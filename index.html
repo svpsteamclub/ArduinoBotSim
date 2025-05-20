@@ -3,10 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arduino Robot Simulator</title>
+    <title>Modern WebApp</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Welcome to Arduino Robot Simulator</h1>
-    <p>This is a clean start.</p>
+    <nav class="navigation">
+        <div class="nav-container">
+            <button class="nav-button" data-section="home">Home</button>
+            <button class="nav-button" data-section="about">About</button>
+            <button class="nav-button" data-section="services">Services</button>
+            <button class="nav-button" data-section="portfolio">Portfolio</button>
+            <button class="nav-button" data-section="contact">Contact</button>
+        </div>
+    </nav>
+
+    <main class="content">
+        <section id="home" class="section active">
+            <h1>Welcome</h1>
+            <p>Experience modern design and smooth interactions.</p>
+        </section>
+        <section id="about" class="section">
+            <h1>About Us</h1>
+            <p>Learn more about our story and mission.</p>
+        </section>
+        <section id="services" class="section">
+            <h1>Our Services</h1>
+            <p>Discover what we can do for you.</p>
+        </section>
+        <section id="portfolio" class="section">
+            <h1>Portfolio</h1>
+            <p>Explore our latest work and achievements.</p>
+        </section>
+        <section id="contact" class="section">
+            <h1>Contact</h1>
+            <p>Get in touch with our team.</p>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
 </body>
 </html> 
