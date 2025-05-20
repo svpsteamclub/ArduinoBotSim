@@ -6,6 +6,11 @@
     <title>Arduino Robot Simulator</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Blockly Dependencies -->
+    <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+    <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/msg/en.js"></script>
 </head>
 <body>
     <nav class="navigation">
@@ -36,7 +41,19 @@
         </section>
         <section id="codigo" class="section">
             <h1>Código</h1>
-            <p>Explora y modifica el código del robot.</p>
+            <div class="editor-container">
+                <div class="toolbar">
+                    <button id="run-code" class="editor-button">Ejecutar</button>
+                    <button id="save-code" class="editor-button">Guardar</button>
+                    <button id="load-code" class="editor-button">Cargar</button>
+                    <button id="clear-workspace" class="editor-button">Limpiar</button>
+                </div>
+                <div id="blocklyDiv" class="blockly-container"></div>
+                <div class="code-preview">
+                    <h3>Código Generado</h3>
+                    <pre id="generated-code"></pre>
+                </div>
+            </div>
         </section>
         <section id="pista" class="section">
             <h1>Pista</h1>
@@ -48,6 +65,8 @@
         </section>
     </main>
 
+    <script src="robot-simulator.js"></script>
     <script src="script.js"></script>
+    <script src="blockly-config.js"></script>
 </body>
 </html> 
