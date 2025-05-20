@@ -91,4 +91,46 @@ main {
 /* Remove old .environment-card styles if not used elsewhere */
 .environment-card, .environment-card:hover, .environment-card h3, .environment-card p {
     all: unset;
+}
+
+/* Navigation bar styles */
+.main-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.main-nav .env-btn {
+    flex: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    background: #f8f8f8;
+    color: #2c3e50;
+    border: 1px solid #e0e0e0;
+    box-shadow: none;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 0;
+}
+
+.main-nav .env-btn:hover, .main-nav .env-btn:focus {
+    background: #2c3e50;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+}
+
+@media (max-width: 700px) {
+    .main-nav {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .main-nav .env-btn {
+        width: 100%;
+        text-align: center;
+    }
 } 
