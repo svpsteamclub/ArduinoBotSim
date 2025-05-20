@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const buttons = document.querySelectorAll('.nav-button');
     const sections = document.querySelectorAll('.section');
+    const mobileMenuButton = document.querySelector('.mobile-menu-button');
+    const navButtons = document.querySelector('.nav-buttons');
 
     // Function to handle section switching
     const switchSection = (targetId) => {
@@ -19,6 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 section.classList.add('active');
             }
         });
+
+        // Close mobile menu after selection
+        if (window.innerWidth <= 768) {
+            navButtons.classList.remove('active');
+            mobileMenuButton.classList.remove('active');
+        }
     };
 
     // Add click event listeners to buttons
@@ -29,13 +37,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Mobile menu toggle
+    mobileMenuButton.addEventListener('click', () => {
+        navButtons.classList.toggle('active');
+        mobileMenuButton.classList.toggle('active');
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && 
+            !e.target.closest('.nav-buttons') && 
+            !e.target.closest('.mobile-menu-button') &&
+            navButtons.classList.contains('active')) {
+            navButtons.classList.remove('active');
+            mobileMenuButton.classList.remove('active');
+        }
+    });
+
     // Handle initial state
-    const initialSection = window.location.hash.slice(1) || 'home';
+    const initialSection = window.location.hash.slice(1) || 'simulador';
     switchSection(initialSection);
 
     // Handle browser back/forward buttons
     window.addEventListener('popstate', () => {
-        const currentSection = window.location.hash.slice(1) || 'home';
+        const currentSection = window.location.hash.slice(1) || 'simulador';
         switchSection(currentSection);
     });
 
@@ -45,5 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const section = button.dataset.section;
             window.history.pushState({}, '', `#${section}`);
         });
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            navButtons.classList.remove('active');
+            mobileMenuButton.classList.remove('active');
+        }
     });
 }); 
