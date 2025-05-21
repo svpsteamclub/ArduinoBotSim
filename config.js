@@ -24,8 +24,8 @@ export const AVAILABLE_TRACK_PARTS = [
     {
         name: 'C1.02-MCS',
         file: 'C1.02-MCS.png',
-        description: 'Middle Cross Section 1',
-        connections: { N: true, E: true, S: true, W: true }
+        description: 'Curva Cerrada',
+        connections: { N: false, E: false, S: true, W: true }
     },
     {
         name: 'C1.03-CCS',
