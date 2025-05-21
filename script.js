@@ -181,6 +181,7 @@ document.querySelectorAll('.dropdown-content a').forEach(link => {
         e.preventDefault();
         const size = parseInt(e.target.dataset.size);
         currentSize = size;
+        placedParts.clear(); // Clear the track when grid size changes
         resizeCanvas(size);
     });
 });
@@ -440,7 +441,7 @@ function generateRandomLoopTrackScriptJS() {
     ];
     let found = false;
     let path = [];
-    for (let attempt = 0; attempt < 20 && !found; attempt++) {
+    for (let attempt = 0; attempt < 30 && !found; attempt++) {
         path = [];
         let visited = new Set();
         let r = Math.floor(Math.random() * size);
