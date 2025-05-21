@@ -440,10 +440,9 @@ function generateRandomLoopTrackScriptJS() {
     ];
     let found = false;
     let path = [];
-    for (let attempt = 0; attempt < 10 && !found; attempt++) {
+    for (let attempt = 0; attempt < 20 && !found; attempt++) {
         path = [];
         let visited = new Set();
-        // Start at random cell
         let r = Math.floor(Math.random() * size);
         let c = Math.floor(Math.random() * size);
         path.push([r, c]);
@@ -476,7 +475,6 @@ function generateRandomLoopTrackScriptJS() {
                 } else break;
             }
         }
-        // Try to close the loop (only if strictly adjacent to start)
         let [sr, sc] = path[0];
         let [er, ec] = path[path.length - 1];
         let canClose = DIRS.some(dir => er + dir.dr === sr && ec + dir.dc === sc);
@@ -486,7 +484,6 @@ function generateRandomLoopTrackScriptJS() {
         }
     }
     if (!found) return alert('No se pudo generar un bucle después de varios intentos.');
-    // Draw the path as a minimalist line on the canvas
     drawGrid(currentSize);
     ctx.save();
     ctx.strokeStyle = '#e67e22';
@@ -512,6 +509,28 @@ function generateRandomLoopTrackScriptJS() {
         ctx.beginPath();
         ctx.arc(x, y, cellSize * 0.15, 0, 2 * Math.PI);
         ctx.fill();
+    }
+    // Mark connection points for each cell in the path
+    const OPP = { north: 'south', east: 'west', south: 'north', west: 'east' };
+    ctx.fillStyle = '#3498db';
+    for (let i = 0; i < path.length - 1; i++) {
+        let [r, c] = path[i];
+        let [pr, pc] = i === 0 ? path[path.length - 2] : path[i - 1];
+        let [nr, nc] = path[i + 1];
+        let fromPrev = DIRS.find(d => pr === r + d.dr && pc === c + d.dc);
+        let toNext = DIRS.find(d => nr === r + d.dr && nc === c + d.dc);
+        let req = {};
+        req[OPP[fromPrev.name]] = true;
+        req[toNext.name] = true;
+        let cellSize = canvas.width / size;
+        let x = c * cellSize + cellSize / 2;
+        let y = r * cellSize + cellSize / 2;
+        const offset = cellSize * 0.32;
+        const square = cellSize * 0.10;
+        if (req.north) ctx.fillRect(x - square/2, y - offset - square/2, square, square);
+        if (req.east)  ctx.fillRect(x + offset - square/2, y - square/2, square, square);
+        if (req.south) ctx.fillRect(x - square/2, y + offset - square/2, square, square);
+        if (req.west)  ctx.fillRect(x - offset - square/2, y - square/2, square, square);
     }
     ctx.restore();
 }
