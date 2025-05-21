@@ -300,6 +300,7 @@ p {
 }
 
 .canvas-container {
+    position: relative;
     flex: 1;
     display: flex;
     justify-content: center;
@@ -420,6 +421,12 @@ p {
 /* .canvas-cell:hover {
     border-color: rgba(91, 155, 213, 0.3);
 } */
+
+.canvas-cell {
+    position: absolute;
+    box-sizing: border-box;
+    background: transparent;
+}
 
 .canvas-cell.selected {
     border-color: var(--accent-color);
