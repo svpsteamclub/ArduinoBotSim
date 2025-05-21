@@ -232,7 +232,8 @@ function createCanvasCells(size) {
                 }
             });
             
-            canvas.appendChild(cell);
+            // FIX: Append to canvas container, not canvas
+            canvas.parentElement.appendChild(cell);
             canvasCells.push(cell);
         }
     }
