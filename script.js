@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize canvas and parts after DOM is ready
     resizeCanvas(currentSize);
-    loadTrackParts();
+    preloadPartImages(loadTrackParts);
 });
 
 // Canvas setup
@@ -144,55 +144,6 @@ function drawConnectionIndicators(partKey, x, y, cellSize, rotation = 0) {
     ctx.fillRect(x + cellSize/2 - size/2, y + cellSize - size - 2, size, size);
     ctx.fillStyle = rotated.west ? '#2ecc40' : '#ff4136';
     ctx.fillRect(x + 2, y + cellSize/2 - size/2, size, size);
-}
-
-// Function to draw the grid
-function drawGrid(size) {
-    const canvasSize = size * CELL_SIZE;
-    
-    // Clear canvas
-    ctx.clearRect(0, 0, canvasSize, canvasSize);
-    
-    // Set grid line style
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2;
-    
-    // Draw vertical lines
-    for (let i = 1; i < size; i++) {
-        const x = i * CELL_SIZE;
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvasSize);
-        ctx.stroke();
-    }
-    
-    // Draw horizontal lines
-    for (let i = 1; i < size; i++) {
-        const y = i * CELL_SIZE;
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvasSize, y);
-        ctx.stroke();
-    }
-
-    // Redraw all placed parts
-    placedParts.forEach((partObj, cellIndex) => {
-        const { name, rotation = 0 } = typeof partObj === 'string' ? { name: partObj, rotation: 0 } : partObj;
-        const cellSize = canvas.width / size;
-        const x = (cellIndex % size) * cellSize;
-        const y = Math.floor(cellIndex / size) * cellSize;
-        const img = new Image();
-        img.src = `assets/track-parts/${name}`;
-        img.onload = () => {
-            ctx.save();
-            ctx.translate(x + cellSize/2, y + cellSize/2);
-            ctx.rotate((rotation * Math.PI) / 180);
-            ctx.drawImage(img, -cellSize/2, -cellSize/2, cellSize, cellSize);
-            ctx.restore();
-            const partKey = name.replace('.png', '');
-            drawConnectionIndicators(partKey, x, y, cellSize, rotation);
-        };
-    });
 }
 
 // Dropdown open/close logic for Tamaño
@@ -272,6 +223,31 @@ const trackConnections = {
   "C2.07-RCI": { north: false, east: true,  south: true,  west: false },
   "C2.08-MCS": { north: true,  east: false, south: true,  west: false }
 };
+
+// --- Image cache for track parts ---
+const partImages = {};
+let partImagesLoaded = 0;
+let partImagesToLoad = TRACK_PARTS.length;
+
+// Preload all part images at startup
+function preloadPartImages(callback) {
+    partImagesLoaded = 0;
+    partImagesToLoad = TRACK_PARTS.length;
+    TRACK_PARTS.forEach(fileName => {
+        const img = new window.Image();
+        img.src = `assets/track-parts/${fileName}`;
+        img.onload = () => {
+            partImagesLoaded++;
+            if (partImagesLoaded === partImagesToLoad && typeof callback === 'function') {
+                callback();
+            } else {
+                // Redraw grid as images load
+                drawGrid(currentSize);
+            }
+        };
+        partImages[fileName] = img;
+    });
+}
 
 // Function to load track parts
 function loadTrackParts() {
@@ -398,6 +374,50 @@ document.addEventListener('keydown', (e) => {
         eraseSelectedPart();
     }
 });
+
+// Function to draw the grid
+function drawGrid(size) {
+    const canvasSize = size * CELL_SIZE;
+    // Clear canvas
+    ctx.clearRect(0, 0, canvasSize, canvasSize);
+    // Set grid line style
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    // Draw vertical lines
+    for (let i = 1; i < size; i++) {
+        const x = i * CELL_SIZE;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvasSize);
+        ctx.stroke();
+    }
+    // Draw horizontal lines
+    for (let i = 1; i < size; i++) {
+        const y = i * CELL_SIZE;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvasSize, y);
+        ctx.stroke();
+    }
+    // Redraw all placed parts
+    placedParts.forEach((partObj, cellIndex) => {
+        const { name, rotation = 0 } = typeof partObj === 'string' ? { name: partObj, rotation: 0 } : partObj;
+        const cellSize = canvas.width / size;
+        const x = (cellIndex % size) * cellSize;
+        const y = Math.floor(cellIndex / size) * cellSize;
+        const img = partImages[name];
+        if (img && img.complete) {
+            ctx.save();
+            ctx.translate(x + cellSize/2, y + cellSize/2);
+            ctx.rotate((rotation * Math.PI) / 180);
+            ctx.drawImage(img, -cellSize/2, -cellSize/2, cellSize, cellSize);
+            ctx.restore();
+            const partKey = name.replace('.png', '');
+            drawConnectionIndicators(partKey, x, y, cellSize, rotation);
+        }
+        // If image not loaded yet, skip drawing (will be drawn on load)
+    });
+}
 
 // Initialize canvas with default size
 resizeCanvas(currentSize);
