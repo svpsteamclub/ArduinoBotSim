@@ -30,8 +30,8 @@ export const AVAILABLE_TRACK_PARTS = [
     {
         name: 'C1.03-CCS',
         file: 'C1.03-CCS.png',
-        description: 'Center Cross Section',
-        connections: { N: true, E: true, S: true, W: true }
+        description: 'Harpin',
+        connections: { N: false, E: true, S: true, W: false }
     },
     {
         name: 'C1.04-MCS',
@@ -43,13 +43,13 @@ export const AVAILABLE_TRACK_PARTS = [
         name: 'C1.05-RCS',
         file: 'C1.05-RCS.png',
         description: 'Right Cross Section 2',
-        connections: { N: true, E: true, S: true, W: false }
+        connections: { N: false, E: true, S: true, W: false }
     },
     {
         name: 'C1.06-MCS',
         file: 'C1.06-MCS.png',
         description: 'Middle Cross Section 3',
-        connections: { N: true, E: true, S: true, W: true }
+        connections: { N: false, E: true, S: true, W: false }
     },
     {
         name: 'C2.07-RCI',
@@ -61,7 +61,7 @@ export const AVAILABLE_TRACK_PARTS = [
         name: 'C2.08-MCS',
         file: 'C2.08-MCS.png',
         description: 'Middle Cross Section 4',
-        connections: { N: true, E: true, S: true, W: true }
+        connections: { N: true, E: false, S: true, W: false }
     }
 ];
 
