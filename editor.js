@@ -13,13 +13,24 @@ require(['vs/editor/editor.main'], function() {
     tabSize: 2,
     readOnly: false,
     scrollBeyondLastLine: false,
-    wordWrap: 'on'
+    wordWrap: 'on',
+    lineNumbers: 'on',
+    lineDecorationsWidth: 0,
+    lineNumbersMinChars: 2
   });
 });
 
 const runBtn = document.getElementById('run-avr8js');
 const stopBtn = document.getElementById('stop-avr8js');
 const outputDiv = document.getElementById('avr8js-output');
+const serialMonitor = document.getElementById('serial-monitor');
+
+function appendSerial(text) {
+  if (serialMonitor) {
+    serialMonitor.textContent += text + '\n';
+    serialMonitor.scrollTop = serialMonitor.scrollHeight;
+  }
+}
 
 runBtn && runBtn.addEventListener('click', () => {
   let code = '';
@@ -27,7 +38,9 @@ runBtn && runBtn.addEventListener('click', () => {
     code = editorInstance.getValue();
   }
   outputDiv.textContent = 'Simulación iniciada (placeholder). Código:\n' + code;
-  // TODO: Integrate avr8js simulation logic here using 'code'
+  if (serialMonitor) serialMonitor.textContent = '';
+  // Example: appendSerial('Serial output will appear here...');
+  // TODO: Integrate avr8js simulation logic here using 'code' and appendSerial for serial output
 });
 
 stopBtn && stopBtn.addEventListener('click', () => {
