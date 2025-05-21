@@ -1,5 +1,7 @@
 // Initialize the code editor
-document.addEventListener('DOMContentLoaded', function() {
+require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
+
+require(['vs/editor/editor.main'], function() {
     // Create the editor instance
     const editor = monaco.editor.create(document.getElementById('editor'), {
         value: '// Escribe tu código Arduino aquí\nvoid setup() {\n  // Configuración inicial\n}\n\nvoid loop() {\n  // Código principal\n}',
@@ -10,7 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
             enabled: true
         },
         fontSize: 14,
-        tabSize: 2
+        tabSize: 2,
+        readOnly: false, // Explicitly set to false to ensure editing is enabled
+        scrollBeyondLastLine: false,
+        wordWrap: 'on'
     });
 
     // Handle compile button click
