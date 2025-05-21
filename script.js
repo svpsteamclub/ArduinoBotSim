@@ -189,10 +189,7 @@ function loadTrackParts() {
         
         // Add click event for selection
         part.addEventListener('click', () => {
-            // Deselect previously selected part
-            document.querySelectorAll('.track-part.selected').forEach(p => p.classList.remove('selected'));
-            // Select new part
-            part.classList.add('selected');
+            // Only set selectedPart, do not highlight
             selectedPart = fileName;
         });
         
