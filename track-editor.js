@@ -170,7 +170,7 @@ class TrackEditor {
             part.row === row && part.col === col
         );
         if (partIndex !== -1) {
-            this.trackParts[partIndex].rotation = ((this.trackParts[partIndex].rotation || 0) + 90) % 360;
+            this.trackParts[partIndex].rotation_deg = ((this.trackParts[partIndex].rotation_deg || 0) + 90) % 360;
             this.drawTrack();
         }
     }
@@ -200,7 +200,7 @@ class TrackEditor {
                 type: this.selectedPart.file,
                 row,
                 col,
-                rotation: 0,
+                rotation_deg: 0,
                 connections: this.selectedPart.connections
             });
             this.drawTrack();
@@ -224,7 +224,7 @@ class TrackEditor {
                     
                     this.ctx.save();
                     this.ctx.translate(x + cellSize/2, y + cellSize/2);
-                    this.ctx.rotate((part.rotation || 0) * Math.PI / 180);
+                    this.ctx.rotate((part.rotation_deg || 0) * Math.PI / 180);
                     this.ctx.drawImage(img, -cellSize/2, -cellSize/2, cellSize, cellSize);
                     this.ctx.restore();
 
@@ -268,19 +268,25 @@ class TrackEditor {
     }
 
     getRotatedConnections(part) {
-        const rotation = part.rotation || 0;
-        const connections = { ...part.connections };
-        
-        // Rotate connections based on part rotation
-        for (let i = 0; i < rotation / 90; i++) {
-            const temp = connections.N;
-            connections.N = connections.W;
-            connections.W = connections.S;
-            connections.S = connections.E;
-            connections.E = temp;
+        const rotation_deg = part.rotation_deg || 0;
+        if (!part || !part.connections) { return {}; }
+        const rotated = {};
+        const DIRECTIONS = [
+            { name: 'N', dr: -1, dc: 0 },
+            { name: 'E', dr: 0, dc: 1 },
+            { name: 'S', dr: 1, dc: 0 },
+            { name: 'W', dr: 0, dc: -1 }
+        ];
+        const numRotations = Math.round(rotation_deg / 90);
+        for (const dirKey in part.connections) {
+            if (part.connections[dirKey]) {
+                let currentDirIndex = DIRECTIONS.findIndex(d => d.name === dirKey);
+                if (currentDirIndex === -1) { continue; }
+                let newDirIndex = (currentDirIndex + numRotations) % 4;
+                rotated[DIRECTIONS[newDirIndex].name] = true;
+            }
         }
-        
-        return connections;
+        return rotated;
     }
 
     validateTrack() {
@@ -419,7 +425,7 @@ class TrackEditor {
             for (const part of shuffledParts) {
                 const rotations = [0, 90, 180, 270].sort(() => 0.5 - Math.random());
                 for (const rot of rotations) {
-                    const rotatedConnections = this.getRotatedConnections({ connections: part.connections, rotation: rot });
+                    const rotatedConnections = this.getRotatedConnections({ connections: part.connections, rotation_deg: rot });
                     let match = true;
                     if (Object.keys(rotatedConnections).length !== 2 || Object.keys(connections).length !== 2) { match = false; }
                     else {
@@ -433,7 +439,7 @@ class TrackEditor {
                             type: part.name,
                             row: r,
                             col: c,
-                            rotation: rot,
+                            rotation_deg: rot,
                             connections: part.connections
                         });
                         placed = true;
