@@ -1,9 +1,17 @@
+import { 
+    TRACK_PART_SIZE_PX, 
+    PIXELS_PER_METER, 
+    AVAILABLE_TRACK_PARTS,
+    DEFAULT_ROBOT_CONFIG,
+    SIMULATION_CONFIG
+} from './config.js';
+
 class TrackEditor {
     constructor() {
         this.canvas = document.getElementById('trackCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.gridSize = 4; // Default 4x4
-        this.cellSize = 350; // 350px per cell
+        this.cellSize = TRACK_PART_SIZE_PX;
         this.selectedPart = null;
         this.isEraseMode = false;
         this.trackParts = [];
@@ -83,23 +91,13 @@ class TrackEditor {
 
     loadTrackParts() {
         const trackPartsContainer = document.querySelector('.track-parts');
-        const parts = [
-            { name: 'C0.00-BCS', image: 'C0.00-BCS.png', description: 'Base Cross Section', connections: { N: true, E: true, S: true, W: true } },
-            { name: 'C1.01-RCS', image: 'C1.01-RCS.png', description: 'Right Cross Section', connections: { N: true, E: true, S: true, W: false } },
-            { name: 'C1.02-MCS', image: 'C1.02-MCS.png', description: 'Middle Cross Section 1', connections: { N: true, E: true, S: true, W: true } },
-            { name: 'C1.03-CCS', image: 'C1.03-CCS.png', description: 'Center Cross Section', connections: { N: true, E: true, S: true, W: true } },
-            { name: 'C1.04-MCS', image: 'C1.04-MCS.png', description: 'Middle Cross Section 2', connections: { N: true, E: true, S: true, W: true } },
-            { name: 'C1.05-RCS', image: 'C1.05-RCS.png', description: 'Right Cross Section 2', connections: { N: true, E: true, S: true, W: false } },
-            { name: 'C1.06-MCS', image: 'C1.06-MCS.png', description: 'Middle Cross Section 3', connections: { N: true, E: true, S: true, W: true } },
-            { name: 'C2.07-RCI', image: 'C2.07-RCI.png', description: 'Right Curve In', connections: { N: false, E: true, S: true, W: false } },
-            { name: 'C2.08-MCS', image: 'C2.08-MCS.png', description: 'Middle Cross Section 4', connections: { N: true, E: true, S: true, W: true } }
-        ];
+        trackPartsContainer.innerHTML = '';
 
-        parts.forEach(part => {
+        AVAILABLE_TRACK_PARTS.forEach(part => {
             const partElement = document.createElement('div');
             partElement.className = 'track-part';
             partElement.innerHTML = `
-                <img src="assets/track-parts/${part.image}" alt="${part.description}">
+                <img src="assets/track-parts/${part.file}" alt="${part.description}">
                 <span>${part.description}</span>
             `;
             partElement.addEventListener('click', () => {
@@ -306,17 +304,6 @@ class TrackEditor {
     generateRandomTrack() {
         this.trackParts = [];
         const numParts = this.gridSize * this.gridSize;
-        const partTypes = [
-            'C0.00-BCS',
-            'C1.01-RCS',
-            'C1.02-MCS',
-            'C1.03-CCS',
-            'C1.04-MCS',
-            'C1.05-RCS',
-            'C1.06-MCS',
-            'C2.07-RCI',
-            'C2.08-MCS'
-        ];
 
         // Start with a base cross section in the center
         const centerRow = Math.floor(this.gridSize / 2);
@@ -329,14 +316,15 @@ class TrackEditor {
             const col = i % this.gridSize;
             if (row === centerRow && col === centerCol) continue;
             
-            const type = partTypes[Math.floor(Math.random() * partTypes.length)];
+            const part = AVAILABLE_TRACK_PARTS[Math.floor(Math.random() * AVAILABLE_TRACK_PARTS.length)];
             const rotation = Math.floor(Math.random() * 4) * 90;
             
             this.trackParts.push({
-                type,
+                type: part.name,
                 row,
                 col,
-                rotation
+                rotation,
+                connections: part.connections
             });
         }
 
