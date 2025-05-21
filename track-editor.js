@@ -197,7 +197,7 @@ class TrackEditor {
             );
             
             this.trackParts.push({
-                type: this.selectedPart.name,
+                type: this.selectedPart.file,
                 row,
                 col,
                 rotation: 0,
@@ -214,22 +214,31 @@ class TrackEditor {
             this.canvas.height / this.gridSize
         );
 
-        this.trackParts.forEach(part => {
-            const img = new Image();
-            img.src = `assets/track-parts/${part.type}.png`;
-            img.onload = () => {
-                const x = part.col * cellSize;
-                const y = part.row * cellSize;
-                
-                this.ctx.save();
-                this.ctx.translate(x + cellSize/2, y + cellSize/2);
-                this.ctx.rotate((part.rotation || 0) * Math.PI / 180);
-                this.ctx.drawImage(img, -cellSize/2, -cellSize/2, cellSize, cellSize);
-                this.ctx.restore();
+        // Create a promise for each part's image loading
+        const imageLoadPromises = this.trackParts.map(part => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const x = part.col * cellSize;
+                    const y = part.row * cellSize;
+                    
+                    this.ctx.save();
+                    this.ctx.translate(x + cellSize/2, y + cellSize/2);
+                    this.ctx.rotate((part.rotation || 0) * Math.PI / 180);
+                    this.ctx.drawImage(img, -cellSize/2, -cellSize/2, cellSize, cellSize);
+                    this.ctx.restore();
 
-                // Draw connection indicators
-                this.drawConnectionIndicators(part, x, y, cellSize);
-            };
+                    // Draw connection indicators
+                    this.drawConnectionIndicators(part, x, y, cellSize);
+                    resolve();
+                };
+                img.src = `assets/track-parts/${part.type}.png`;
+            });
+        });
+
+        // Wait for all images to load before completing the draw
+        Promise.all(imageLoadPromises).catch(error => {
+            console.error('Error loading track part images:', error);
         });
     }
 
