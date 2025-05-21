@@ -50,7 +50,7 @@ runBtn && runBtn.addEventListener('click', async () => {
 
   try {
     // Compile the code using avr-gcc-wasm
-    const result = await AvrGccWasm.compileSketch(code);
+    const result = await window.AvrGccWasm.compileSketch(code);
     if (result.errors) {
       outputDiv.textContent = 'Error de compilación:\n' + result.errors;
       return;
