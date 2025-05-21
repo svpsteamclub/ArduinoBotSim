@@ -497,51 +497,35 @@ function generateRandomLoopTrackScriptJS() {
         tries++;
     }
     if (path.length < 4) return alert('No se pudo generar un bucle.');
-    // 2. For each cell, determine required connections
-    let cellReqs = [];
-    for (let i = 0; i < path.length - 1; i++) {
+    // 2. DEBUG: Draw the path as a minimalist line on the canvas
+    drawGrid(currentSize); // Draw grid only, no parts
+    ctx.save();
+    ctx.strokeStyle = '#e67e22';
+    ctx.lineWidth = 6;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    for (let i = 0; i < path.length; i++) {
         let [r, c] = path[i];
-        let [pr, pc] = i === 0 ? path[path.length - 2] : path[i - 1];
-        let [nr, nc] = path[i + 1];
-        let fromPrev = DIRS.find(d => pr === r + d.dr && pc === c + d.dc);
-        let toNext = DIRS.find(d => nr === r + d.dr && nc === c + d.dc);
-        let req = {};
-        req[OPP[fromPrev.name]] = true;
-        req[toNext.name] = true;
-        cellReqs.push({ r, c, req });
+        let cellSize = canvas.width / size;
+        let x = c * cellSize + cellSize / 2;
+        let y = r * cellSize + cellSize / 2;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
     }
-    // 3. For each cell, pick a part+rotation that matches
-    for (let { r, c, req } of cellReqs) {
-        let idx = rc2idx(r, c);
-        let found = false;
-        let partNames = TRACK_PARTS.slice().sort(() => Math.random() - 0.5);
-        for (let partName of partNames) {
-            let baseKey = partName.replace('.png', '');
-            let conns = trackConnections[baseKey];
-            if (!conns) continue;
-            for (let rot of [0, 90, 180, 270].sort(() => Math.random() - 0.5)) {
-                // Rotate connections
-                let dirs = ['north', 'east', 'south', 'west'];
-                let rotated = {};
-                for (let i = 0; i < 4; i++) {
-                    rotated[dirs[(i + rot / 90) % 4]] = conns[dirs[i]];
-                }
-                let match = Object.keys(req).every(d => rotated[d]);
-                if (match && Object.values(rotated).filter(Boolean).length === 2) {
-                    placedParts.set(idx, { name: partName, rotation: rot });
-                    found = true;
-                    break;
-                }
-            }
-            if (found) break;
-        }
-        if (!found) {
-            // If no part fits, clear and abort
-            placedParts.clear();
-            return alert('No hay piezas suficientes para el bucle.');
-        }
+    ctx.closePath();
+    ctx.stroke();
+    // Optionally, draw dots for each cell in the path
+    ctx.fillStyle = '#e74c3c';
+    for (let i = 0; i < path.length; i++) {
+        let [r, c] = path[i];
+        let cellSize = canvas.width / size;
+        let x = c * cellSize + cellSize / 2;
+        let y = r * cellSize + cellSize / 2;
+        ctx.beginPath();
+        ctx.arc(x, y, cellSize * 0.15, 0, 2 * Math.PI);
+        ctx.fill();
     }
-    drawGrid(currentSize);
+    ctx.restore();
 }
 
 // Add Aleatoria button event
