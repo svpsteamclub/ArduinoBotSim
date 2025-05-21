@@ -309,7 +309,8 @@ function createCanvasCells(size) {
                 e.preventDefault();
                 if (!eraseMode && placedParts.has(cellIndex)) {
                     const partObj = placedParts.get(cellIndex);
-                    const newRot = ((partObj.rotation || 0) + 90) % 360;
+                    const currentRot = (typeof partObj.rotation === 'number') ? partObj.rotation : 0;
+                    const newRot = (currentRot + 90) % 360;
                     placedParts.set(cellIndex, { name: partObj.name, rotation: newRot });
                     drawGrid(currentSize);
                 }
