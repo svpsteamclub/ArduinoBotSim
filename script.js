@@ -215,8 +215,9 @@ function loadTrackParts() {
 
 // Function to create canvas cells
 function createCanvasCells(size) {
-    // Clear existing cells
-    canvasCells.forEach(cell => cell.remove());
+    // Remove all existing .canvas-cell overlays from the DOM
+    const container = canvas.parentElement;
+    container.querySelectorAll('.canvas-cell').forEach(cell => cell.remove());
     canvasCells = [];
     placedParts.clear();
     
@@ -248,7 +249,7 @@ function createCanvasCells(size) {
             });
             
             // Append to canvas container, not canvas
-            canvas.parentElement.appendChild(cell);
+            container.appendChild(cell);
             canvasCells.push(cell);
         }
     }
