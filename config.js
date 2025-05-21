@@ -12,14 +12,14 @@ export const AVAILABLE_TRACK_PARTS = [
     {
         name: 'C0.00-BCS',
         file: 'C0.00-BCS.png',
-        description: 'Base Cross Section',
-        connections: { N: true, E: true, S: true, W: true }
+        description: 'Vacia',
+        connections: { N: false, E: false, S: fasle, W: false }
     },
     {
         name: 'C1.01-RCS',
         file: 'C1.01-RCS.png',
-        description: 'Right Cross Section',
-        connections: { N: true, E: true, S: true, W: false }
+        description: 'Recta',
+        connections: { N: true, E: fasle, S: true, W: false }
     },
     {
         name: 'C1.02-MCS',
