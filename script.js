@@ -79,6 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
             mobileMenuButton.classList.remove('active');
         }
     });
+
+    // Initialize canvas and parts after DOM is ready
+    resizeCanvas(currentSize);
+    loadTrackParts();
 });
 
 // Canvas setup
