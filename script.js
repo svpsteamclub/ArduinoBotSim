@@ -141,6 +141,18 @@ function drawGrid(size) {
         ctx.lineTo(canvasSize, y);
         ctx.stroke();
     }
+
+    // Redraw all placed parts
+    placedParts.forEach((partName, cellIndex) => {
+        const cellSize = canvas.width / size;
+        const x = (cellIndex % size) * cellSize;
+        const y = Math.floor(cellIndex / size) * cellSize;
+        const img = new Image();
+        img.src = `assets/track-parts/${partName}`;
+        img.onload = () => {
+            ctx.drawImage(img, x, y, cellSize, cellSize);
+        };
+    });
 }
 
 // Handle size selection
