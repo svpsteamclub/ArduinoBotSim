@@ -352,6 +352,8 @@ class TrackEditor {
             }
             if (path.length >= maxPathLength) break;
         }
+        // Debug: Show the cells selected by the path generator
+        console.log('Generated path cells:', path.map(cell => `(${cell.r},${cell.c})`).join(' -> '));
         // Try to close the loop
         let loopClosed = false;
         for (const dir of DIRS) {
