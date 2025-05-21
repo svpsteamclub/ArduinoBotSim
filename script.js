@@ -327,6 +327,9 @@ function placePart(cellIndex, partName) {
     placedParts.set(cellIndex, { name: partName, rotation: 0 });
     drawGrid(currentSize);
     selectCell(cellIndex);
+    // Unselect part in the part list after placing
+    trackParts.forEach(p => p.classList.remove('selected'));
+    selectedPart = null;
 }
 
 // Function to select a cell
