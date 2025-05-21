@@ -374,6 +374,17 @@ eraseButton.addEventListener('click', () => {
 });
 document.querySelector('.pista-buttons').appendChild(eraseButton);
 
+// Add Limpiar button
+const limpiarButton = document.createElement('button');
+limpiarButton.className = 'pista-button';
+limpiarButton.textContent = 'Limpiar';
+limpiarButton.style.transition = 'background 0.2s, color 0.2s';
+limpiarButton.addEventListener('click', () => {
+    placedParts.clear();
+    drawGrid(currentSize);
+});
+document.querySelector('.pista-buttons').appendChild(limpiarButton);
+
 // Handle keyboard events
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Delete' || e.key === 'Backspace') {
