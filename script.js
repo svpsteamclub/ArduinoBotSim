@@ -540,6 +540,45 @@ function generateRandomLoopTrackScriptJS() {
         if (conn.west)  ctx.fillRect(x - offset, y - squareSize/2, squareSize, squareSize);
     }
     ctx.restore();
+
+    // --- Place random parts matching required connections ---
+    placedParts.clear();
+    const dirs = ['north', 'east', 'south', 'west'];
+    for (const key in cellConnections) {
+        const [r, c] = key.split(',').map(Number);
+        const required = cellConnections[key];
+        let candidates = [];
+        for (const partFile of TRACK_PARTS) {
+            const partKey = partFile.replace('.png', '');
+            const baseConn = trackConnections[partKey];
+            if (!baseConn) continue;
+            for (let rot = 0; rot < 4; rot++) {
+                // Rotate the part's connections
+                let rotated = {};
+                dirs.forEach((dir, i) => {
+                    rotated[dirs[(i + rot) % 4]] = baseConn[dir];
+                });
+                // Check if all required directions are true and all others are false
+                let match = true;
+                for (const dir of dirs) {
+                    if (!!rotated[dir] !== !!required[dir]) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    candidates.push({ name: partFile, rotation: rot * 90 });
+                }
+            }
+        }
+        if (candidates.length > 0) {
+            const pick = candidates[Math.floor(Math.random() * candidates.length)];
+            const cellIndex = r * size + c;
+            placedParts.set(cellIndex, { name: pick.name, rotation: pick.rotation });
+        }
+        // If no candidate, leave cell empty
+    }
+    drawGrid(currentSize);
 }
 
 // Add Aleatoria button event
