@@ -122,14 +122,13 @@ function resizeCanvas(size) {
 function drawConnectionIndicators(partKey, x, y, cellSize, rotation = 0) {
     const conn = trackConnections[partKey];
     if (!conn) return;
-    const size = 12;
+    const size = 7; // smaller indicator size
     // Helper to rotate a direction
     function rotateDir(dir, rot) {
         const dirs = ['north', 'east', 'south', 'west'];
         let idx = dirs.indexOf(dir);
         return dirs[(idx + rot) % 4];
     }
-    // Rotate connection states
     const rot = ((rotation % 360) + 360) % 360;
     const steps = Math.round(rot / 90) % 4;
     const dirs = ['north', 'east', 'south', 'west'];
@@ -137,16 +136,12 @@ function drawConnectionIndicators(partKey, x, y, cellSize, rotation = 0) {
     dirs.forEach((dir, i) => {
         rotated[dirs[(i + steps) % 4]] = conn[dir];
     });
-    // North
     ctx.fillStyle = rotated.north ? '#2ecc40' : '#ff4136';
     ctx.fillRect(x + cellSize/2 - size/2, y + 2, size, size);
-    // East
     ctx.fillStyle = rotated.east ? '#2ecc40' : '#ff4136';
     ctx.fillRect(x + cellSize - size - 2, y + cellSize/2 - size/2, size, size);
-    // South
     ctx.fillStyle = rotated.south ? '#2ecc40' : '#ff4136';
     ctx.fillRect(x + cellSize/2 - size/2, y + cellSize - size - 2, size, size);
-    // West
     ctx.fillStyle = rotated.west ? '#2ecc40' : '#ff4136';
     ctx.fillRect(x + 2, y + cellSize/2 - size/2, size, size);
 }
@@ -285,52 +280,24 @@ function loadTrackParts() {
         part.className = 'track-part';
         part.dataset.part = fileName;
         part.style.backgroundImage = `url('assets/track-parts/${fileName}')`;
-        
-        // Add connection indicators
-        const partKey = fileName.replace('.png', '');
-        const conn = trackConnections[partKey];
-        if (conn) {
-            // North
-            const north = document.createElement('div');
-            north.className = 'conn-indicator north';
-            north.style.background = conn.north ? '#2ecc40' : '#ff4136';
-            part.appendChild(north);
-            // East
-            const east = document.createElement('div');
-            east.className = 'conn-indicator east';
-            east.style.background = conn.east ? '#2ecc40' : '#ff4136';
-            part.appendChild(east);
-            // South
-            const south = document.createElement('div');
-            south.className = 'conn-indicator south';
-            south.style.background = conn.south ? '#2ecc40' : '#ff4136';
-            part.appendChild(south);
-            // West
-            const west = document.createElement('div');
-            west.className = 'conn-indicator west';
-            west.style.background = conn.west ? '#2ecc40' : '#ff4136';
-            part.appendChild(west);
-        }
-        
         // Add click event for selection
         part.addEventListener('click', () => {
             if (selectedPart === fileName) {
-                // Unselect if already selected
                 part.classList.remove('selected');
                 selectedPart = null;
             } else {
-                // Remove 'selected' from all parts
                 trackParts.forEach(p => p.classList.remove('selected'));
-                // Add 'selected' to the clicked part
                 part.classList.add('selected');
                 selectedPart = fileName;
             }
         });
-        
         partsList.appendChild(part);
         trackParts.push(part);
     });
 }
+
+// Add erase mode state
+let eraseMode = false;
 
 // Function to create canvas cells
 function createCanvasCells(size) {
@@ -350,16 +317,21 @@ function createCanvasCells(size) {
             cell.style.top = `${y * cellHeight}px`;
             const cellIndex = y * size + x;
             cell.addEventListener('click', () => {
-                if (selectedPart) {
+                if (eraseMode) {
+                    if (placedParts.has(cellIndex)) {
+                        placedParts.delete(cellIndex);
+                        drawGrid(currentSize);
+                    }
+                } else if (selectedPart) {
                     placePart(cellIndex, selectedPart);
                 } else if (placedParts.has(cellIndex)) {
                     selectCell(cellIndex);
                 }
             });
-            // Double-click to rotate
+            // Double-click to rotate (only if not in erase mode)
             cell.addEventListener('dblclick', (e) => {
                 e.preventDefault();
-                if (placedParts.has(cellIndex)) {
+                if (!eraseMode && placedParts.has(cellIndex)) {
                     const partObj = placedParts.get(cellIndex);
                     const newRot = ((partObj.rotation || 0) + 90) % 360;
                     placedParts.set(cellIndex, { name: partObj.name, rotation: newRot });
@@ -403,11 +375,21 @@ function eraseSelectedPart() {
     }
 }
 
-// Add erase button
+// Update erase button to toggle erase mode
 const eraseButton = document.createElement('button');
 eraseButton.className = 'pista-button';
 eraseButton.textContent = 'Borrar';
-eraseButton.addEventListener('click', eraseSelectedPart);
+eraseButton.style.transition = 'background 0.2s, color 0.2s';
+eraseButton.addEventListener('click', () => {
+    eraseMode = !eraseMode;
+    if (eraseMode) {
+        eraseButton.style.background = '#d9534f';
+        eraseButton.style.color = 'white';
+    } else {
+        eraseButton.style.background = '';
+        eraseButton.style.color = '';
+    }
+});
 document.querySelector('.pista-buttons').appendChild(eraseButton);
 
 // Handle keyboard events
