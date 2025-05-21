@@ -16,9 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update sections
         sections.forEach(section => {
-            section.classList.remove('active');
             if (section.id === targetId) {
                 section.classList.add('active');
+            } else {
+                section.classList.remove('active');
             }
         });
 
