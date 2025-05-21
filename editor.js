@@ -1,20 +1,21 @@
-// Initialize the code editor
-require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
+// Minimalist AVR8js code editor setup
+// (Assumes avr8js and related logic will be loaded elsewhere)
 
-require(['vs/editor/editor.main'], function() {
-    // Create the editor instance
-    const editor = monaco.editor.create(document.getElementById('editor'), {
-        value: '// Escribe tu código Arduino aquí\nvoid setup() {\n  // Configuración inicial\n}\n\nvoid loop() {\n  // Código principal\n}',
-        language: 'cpp',
-        theme: 'vs',
-        automaticLayout: true,
-        minimap: {
-            enabled: true
-        },
-        fontSize: 14,
-        tabSize: 2,
-        readOnly: false,
-        scrollBeyondLastLine: false,
-        wordWrap: 'on'
-    });
+const codeTextarea = document.getElementById('avr8js-code');
+const runBtn = document.getElementById('run-avr8js');
+const stopBtn = document.getElementById('stop-avr8js');
+const outputDiv = document.getElementById('avr8js-output');
+
+if (codeTextarea) {
+  codeTextarea.value = `// Escribe tu código Arduino aquí\nvoid setup() {\n  // Configuración inicial\n}\n\nvoid loop() {\n  // Código principal\n}`;
+}
+
+runBtn && runBtn.addEventListener('click', () => {
+  outputDiv.textContent = 'Simulación iniciada (placeholder).';
+  // TODO: Integrate avr8js simulation logic here
+});
+
+stopBtn && stopBtn.addEventListener('click', () => {
+  outputDiv.textContent = 'Simulación detenida.';
+  // TODO: Stop avr8js simulation logic here
 }); 
