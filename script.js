@@ -110,6 +110,7 @@ function resizeCanvas(size) {
     canvas.height = canvasSize;
     scale = calculateScale(size);
     drawGrid(size);
+    createCanvasCells(size);
 }
 
 // Function to draw the grid
@@ -157,13 +158,13 @@ window.addEventListener('resize', () => {
     resizeCanvas(currentSize);
 });
 
-// Initialize canvas with default size
-resizeCanvas(currentSize);
-
 // Track parts handling
 const partsList = document.querySelector('.parts-list');
 let trackParts = [];
-let draggedPart = null;
+let selectedPart = null;
+let selectedCell = null;
+let canvasCells = [];
+let placedParts = new Map(); // Map to store placed parts: cellIndex -> partName
 
 // Static list of track parts
 const TRACK_PARTS = [
@@ -183,64 +184,117 @@ function loadTrackParts() {
     TRACK_PARTS.forEach(fileName => {
         const part = document.createElement('div');
         part.className = 'track-part';
-        part.draggable = true;
         part.dataset.part = fileName;
         part.style.backgroundImage = `url('assets/track-parts/${fileName}')`;
         
-        // Add drag events
-        part.addEventListener('dragstart', handleDragStart);
-        part.addEventListener('dragend', handleDragEnd);
+        // Add click event for selection
+        part.addEventListener('click', () => {
+            // Deselect previously selected part
+            document.querySelectorAll('.track-part.selected').forEach(p => p.classList.remove('selected'));
+            // Select new part
+            part.classList.add('selected');
+            selectedPart = fileName;
+        });
         
         partsList.appendChild(part);
         trackParts.push(part);
     });
 }
 
-// Drag and drop handlers
-function handleDragStart(e) {
-    draggedPart = this;
-    this.classList.add('dragging');
-    e.dataTransfer.setData('text/plain', this.dataset.part);
+// Function to create canvas cells
+function createCanvasCells(size) {
+    // Clear existing cells
+    canvasCells.forEach(cell => cell.remove());
+    canvasCells = [];
+    placedParts.clear();
+    
+    const cellSize = canvas.width / size;
+    
+    for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+            const cell = document.createElement('div');
+            cell.className = 'canvas-cell';
+            cell.style.width = `${cellSize}px`;
+            cell.style.height = `${cellSize}px`;
+            cell.style.left = `${x * cellSize}px`;
+            cell.style.top = `${y * cellSize}px`;
+            
+            const cellIndex = y * size + x;
+            
+            // Add click event for part placement
+            cell.addEventListener('click', () => {
+                if (selectedPart) {
+                    // Place part
+                    placePart(cellIndex, selectedPart);
+                } else if (placedParts.has(cellIndex)) {
+                    // Select placed part
+                    selectCell(cellIndex);
+                }
+            });
+            
+            canvas.appendChild(cell);
+            canvasCells.push(cell);
+        }
+    }
 }
 
-function handleDragEnd(e) {
-    this.classList.remove('dragging');
-    draggedPart = null;
-}
-
-// Canvas drop handling
-canvas.addEventListener('dragover', (e) => {
-    e.preventDefault();
-});
-
-canvas.addEventListener('drop', (e) => {
-    e.preventDefault();
-    if (!draggedPart) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // Calculate grid position
-    const cellX = Math.floor(x / (canvas.width / currentSize));
-    const cellY = Math.floor(y / (canvas.height / currentSize));
-
-    // Draw the part on the canvas
+// Function to place a part
+function placePart(cellIndex, partName) {
+    const cell = canvasCells[cellIndex];
+    const cellSize = canvas.width / currentSize;
+    const x = (cellIndex % currentSize) * cellSize;
+    const y = Math.floor(cellIndex / currentSize) * cellSize;
+    
+    // Draw part on canvas
     const img = new Image();
-    img.src = `assets/track-parts/${draggedPart.dataset.part}`;
+    img.src = `assets/track-parts/${partName}`;
     img.onload = () => {
-        const cellWidth = canvas.width / currentSize;
-        const cellHeight = canvas.height / currentSize;
-        
-        ctx.drawImage(
-            img,
-            cellX * cellWidth,
-            cellY * cellHeight,
-            cellWidth,
-            cellHeight
-        );
+        ctx.drawImage(img, x, y, cellSize, cellSize);
+        placedParts.set(cellIndex, partName);
+        selectCell(cellIndex);
     };
+}
+
+// Function to select a cell
+function selectCell(cellIndex) {
+    // Deselect previously selected cell
+    document.querySelectorAll('.canvas-cell.selected').forEach(c => c.classList.remove('selected'));
+    // Select new cell
+    canvasCells[cellIndex].classList.add('selected');
+    selectedCell = cellIndex;
+}
+
+// Function to erase selected part
+function eraseSelectedPart() {
+    if (selectedCell !== null && placedParts.has(selectedCell)) {
+        const cellSize = canvas.width / currentSize;
+        const x = (selectedCell % currentSize) * cellSize;
+        const y = Math.floor(selectedCell / currentSize) * cellSize;
+        
+        // Clear the cell
+        ctx.clearRect(x, y, cellSize, cellSize);
+        placedParts.delete(selectedCell);
+        canvasCells[selectedCell].classList.remove('selected');
+        selectedCell = null;
+        
+        // Redraw grid lines
+        drawGrid(currentSize);
+    }
+}
+
+// Add erase button
+const eraseButton = document.createElement('button');
+eraseButton.className = 'pista-button';
+eraseButton.textContent = 'Borrar';
+eraseButton.addEventListener('click', eraseSelectedPart);
+document.querySelector('.pista-buttons').appendChild(eraseButton);
+
+// Handle keyboard events
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+        eraseSelectedPart();
+    }
 });
 
-// Load track parts when the page loads
-loadTrackParts(); 
+// Initialize canvas with default size
+resizeCanvas(currentSize); 
