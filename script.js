@@ -219,7 +219,6 @@ function createCanvasCells(size) {
     const container = canvas.parentElement;
     container.querySelectorAll('.canvas-cell').forEach(cell => cell.remove());
     canvasCells = [];
-    placedParts.clear();
     
     // Use the canvas's displayed size for cell overlays
     const rect = canvas.getBoundingClientRect();
