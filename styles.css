@@ -176,8 +176,8 @@ p {
     }
 
     .content {
-        margin-top: 80px;
-        padding: 1rem;
+        margin-top: 100px;
+        padding: 2rem;
     }
 
     /* Hamburger menu animation */
@@ -241,7 +241,7 @@ p {
 }
 
 .pista-button {
-    padding: 0.4rem 1.5rem;
+    padding: 0.1rem 1.5rem;
     background-color: #4a90e2;
     color: white;
     border: none;
