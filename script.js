@@ -255,10 +255,7 @@ function placePart(cellIndex, partName) {
 
 // Function to select a cell
 function selectCell(cellIndex) {
-    // Deselect previously selected cell
-    document.querySelectorAll('.canvas-cell.selected').forEach(c => c.classList.remove('selected'));
-    // Select new cell
-    canvasCells[cellIndex].classList.add('selected');
+    // Only update selectedCell, do not highlight
     selectedCell = cellIndex;
 }
 
@@ -272,7 +269,7 @@ function eraseSelectedPart() {
         // Clear the cell
         ctx.clearRect(x, y, cellSize, cellSize);
         placedParts.delete(selectedCell);
-        canvasCells[selectedCell].classList.remove('selected');
+        // Do not remove 'selected' class
         selectedCell = null;
         
         // Redraw grid lines

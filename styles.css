@@ -416,15 +416,10 @@ p {
     transform: scale(1.1);
 }
 
-.canvas-cell {
-    position: absolute;
-    border: 2px solid transparent;
-    transition: border-color 0.2s ease;
-}
-
-.canvas-cell:hover {
+/* Remove hover effect for canvas cells */
+/* .canvas-cell:hover {
     border-color: rgba(91, 155, 213, 0.3);
-}
+} */
 
 .canvas-cell.selected {
     border-color: var(--accent-color);
