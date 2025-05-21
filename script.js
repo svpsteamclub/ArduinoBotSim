@@ -700,4 +700,40 @@ function loadTrackFromJSON() {
 const cargarBtn = document.getElementById('cargar');
 if (cargarBtn) {
     cargarBtn.addEventListener('click', loadTrackFromJSON);
-} 
+}
+
+// Simulator controls
+const startSimButton = document.getElementById('start-sim');
+const stopSimButton = document.getElementById('stop-sim');
+const outputDisplay = document.querySelector('.output-display');
+let simulationInterval;
+
+startSimButton.addEventListener('click', () => {
+    startSimButton.disabled = true;
+    stopSimButton.disabled = false;
+    
+    // Start the simulation
+    simulationInterval = setInterval(() => {
+        // Example: Move the square in a circular pattern
+        const time = Date.now() / 1000;
+        const radius = 100;
+        const x = Math.cos(time) * radius;
+        const y = Math.sin(time) * radius;
+        
+        outputDisplay.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+    }, 16); // ~60fps
+});
+
+stopSimButton.addEventListener('click', () => {
+    startSimButton.disabled = false;
+    stopSimButton.disabled = true;
+    
+    // Stop the simulation
+    clearInterval(simulationInterval);
+    
+    // Reset the square position
+    outputDisplay.style.transform = 'translate(-50%, -50%)';
+});
+
+// Initially disable the stop button
+stopSimButton.disabled = true; 
