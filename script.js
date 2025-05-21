@@ -297,4 +297,5 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Initialize canvas with default size
-resizeCanvas(currentSize); 
+resizeCanvas(currentSize);
+loadTrackParts(); 
