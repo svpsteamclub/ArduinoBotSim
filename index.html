@@ -41,21 +41,31 @@
         <section id="pista" class="section">
             <h1>Editor de Pistas</h1>
             <p>Explora y modifica las pistas del robot.</p>
-            <div class="pista-buttons">
-                <div class="dropdown">
-                    <button class="pista-button" id="tamano">Tamaño</button>
-                    <div class="dropdown-content">
-                        <a href="#" data-size="3">3x3</a>
-                        <a href="#" data-size="4">4x4</a>
-                        <a href="#" data-size="5">5x5</a>
+            <div class="pista-layout">
+                <div class="parts-sidebar">
+                    <h2>Partes de Pista</h2>
+                    <div class="parts-list">
+                        <!-- Parts will be loaded dynamically -->
                     </div>
                 </div>
-                <button class="pista-button" id="crear-aleatoria">Crear Pista Aleatoria</button>
-                <button class="pista-button" id="cargar">Cargar</button>
-                <button class="pista-button" id="guardar">Guardar</button>
-            </div>
-            <div class="canvas-container">
-                <canvas id="pistaCanvas"></canvas>
+                <div class="pista-main">
+                    <div class="pista-buttons">
+                        <div class="dropdown">
+                            <button class="pista-button" id="tamano">Tamaño</button>
+                            <div class="dropdown-content">
+                                <a href="#" data-size="3">3x3</a>
+                                <a href="#" data-size="4">4x4</a>
+                                <a href="#" data-size="5">5x5</a>
+                            </div>
+                        </div>
+                        <button class="pista-button" id="crear-aleatoria">Crear Pista Aleatoria</button>
+                        <button class="pista-button" id="cargar">Cargar</button>
+                        <button class="pista-button" id="guardar">Guardar</button>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="pistaCanvas"></canvas>
+                    </div>
+                </div>
             </div>
         </section>
         <section id="sobre" class="section">

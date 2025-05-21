@@ -313,4 +313,57 @@ p {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+}
+
+.pista-layout {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.parts-sidebar {
+    width: 250px;
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+}
+
+.parts-sidebar h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.parts-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.track-part {
+    width: 100px;
+    height: 100px;
+    border: 2px solid #eee;
+    border-radius: 4px;
+    cursor: move;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.track-part:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.track-part.dragging {
+    opacity: 0.5;
+    transform: scale(1.1);
+}
+
+.pista-main {
+    flex: 1;
 } 

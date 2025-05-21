@@ -158,4 +158,89 @@ window.addEventListener('resize', () => {
 });
 
 // Initialize canvas with default size
-resizeCanvas(currentSize); 
+resizeCanvas(currentSize);
+
+// Track parts handling
+const partsList = document.querySelector('.parts-list');
+let trackParts = [];
+let draggedPart = null;
+
+// Function to load track parts
+async function loadTrackParts() {
+    try {
+        const response = await fetch('track-parts/');
+        const files = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(files, 'text/html');
+        const links = doc.querySelectorAll('a');
+        
+        links.forEach(link => {
+            const fileName = link.href.split('/').pop();
+            if (fileName.endsWith('.png')) {
+                const part = document.createElement('div');
+                part.className = 'track-part';
+                part.draggable = true;
+                part.dataset.part = fileName;
+                part.style.backgroundImage = `url('track-parts/${fileName}')`;
+                
+                // Add drag events
+                part.addEventListener('dragstart', handleDragStart);
+                part.addEventListener('dragend', handleDragEnd);
+                
+                partsList.appendChild(part);
+                trackParts.push(part);
+            }
+        });
+    } catch (error) {
+        console.error('Error loading track parts:', error);
+    }
+}
+
+// Drag and drop handlers
+function handleDragStart(e) {
+    draggedPart = this;
+    this.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', this.dataset.part);
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    draggedPart = null;
+}
+
+// Canvas drop handling
+canvas.addEventListener('dragover', (e) => {
+    e.preventDefault();
+});
+
+canvas.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (!draggedPart) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Calculate grid position
+    const cellX = Math.floor(x / (canvas.width / currentSize));
+    const cellY = Math.floor(y / (canvas.height / currentSize));
+
+    // Draw the part on the canvas
+    const img = new Image();
+    img.src = `track-parts/${draggedPart.dataset.part}`;
+    img.onload = () => {
+        const cellWidth = canvas.width / currentSize;
+        const cellHeight = canvas.height / currentSize;
+        
+        ctx.drawImage(
+            img,
+            cellX * cellWidth,
+            cellY * cellHeight,
+            cellWidth,
+            cellHeight
+        );
+    };
+});
+
+// Load track parts when the page loads
+loadTrackParts(); 
