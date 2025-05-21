@@ -251,11 +251,46 @@ p {
     border-radius: 6px;
 }
 
+.track-part {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform var(--transition-speed) ease,
+                box-shadow var(--transition-speed) ease;
+}
+
+.track-part:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.track-part img {
+    width: 100%;
+    height: auto;
+    max-width: 100px;
+    object-fit: contain;
+}
+
+.track-part span {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    text-align: center;
+    color: var(--text-color);
+}
+
 .track-parts {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 1rem;
     margin-top: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .track-canvas-container {
