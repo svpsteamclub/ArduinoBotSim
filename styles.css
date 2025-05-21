@@ -4,6 +4,7 @@
     -moz-user-select: none;     /* Firefox */
     -ms-user-select: none;      /* IE10+/Edge */
     user-select: none;          /* Standard */
+    touch-action: manipulation; /* Enable double-tap on mobile */
 }
 
 /* Allow text selection for specific elements that need it */
@@ -12,6 +13,7 @@ input, textarea, [contenteditable="true"] {
     -moz-user-select: text;
     -ms-user-select: text;
     user-select: text;
+    touch-action: auto; /* Reset touch-action for input elements */
 }
 
 :root {
@@ -418,6 +420,7 @@ p {
     background-position: center;
     background-repeat: no-repeat;
     position: relative;
+    touch-action: manipulation; /* Enable double-tap on track parts */
 }
 
 .track-part:hover {
