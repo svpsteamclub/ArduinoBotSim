@@ -484,8 +484,14 @@ function generateRandomLoopTrackScriptJS() {
         }
     }
     if (!found) return alert('No se pudo generar un bucle después de varios intentos.');
+
+    // Clear canvas and draw grid
     drawGrid(currentSize);
+
+    // Draw the path and connection points
     ctx.save();
+    
+    // Draw the path line
     ctx.strokeStyle = '#e67e22';
     ctx.lineWidth = 6;
     ctx.lineJoin = 'round';
@@ -500,37 +506,63 @@ function generateRandomLoopTrackScriptJS() {
     }
     ctx.closePath();
     ctx.stroke();
-    ctx.fillStyle = '#e74c3c';
-    for (let i = 0; i < path.length; i++) {
-        let [r, c] = path[i];
-        let cellSize = canvas.width / size;
-        let x = c * cellSize + cellSize / 2;
-        let y = r * cellSize + cellSize / 2;
-        ctx.beginPath();
-        ctx.arc(x, y, cellSize * 0.15, 0, 2 * Math.PI);
-        ctx.fill();
-    }
-    // Mark connection points for each cell in the path
+
+    // Draw connection points for each cell
     const OPP = { north: 'south', east: 'west', south: 'north', west: 'east' };
     ctx.fillStyle = '#3498db';
+    const squareSize = CELL_SIZE * 0.15;
+    const offset = CELL_SIZE * 0.35;
+
     for (let i = 0; i < path.length - 1; i++) {
         let [r, c] = path[i];
         let [pr, pc] = i === 0 ? path[path.length - 2] : path[i - 1];
         let [nr, nc] = path[i + 1];
+        
+        // Find directions from previous and to next cell
         let fromPrev = DIRS.find(d => pr === r + d.dr && pc === c + d.dc);
         let toNext = DIRS.find(d => nr === r + d.dr && nc === c + d.dc);
-        let req = {};
-        req[OPP[fromPrev.name]] = true;
-        req[toNext.name] = true;
+        
+        // Calculate cell center
         let cellSize = canvas.width / size;
         let x = c * cellSize + cellSize / 2;
         let y = r * cellSize + cellSize / 2;
-        const offset = cellSize * 0.32;
-        const square = cellSize * 0.10;
-        if (req.north) ctx.fillRect(x - square/2, y - offset - square/2, square, square);
-        if (req.east)  ctx.fillRect(x + offset - square/2, y - square/2, square, square);
-        if (req.south) ctx.fillRect(x - square/2, y + offset - square/2, square, square);
-        if (req.west)  ctx.fillRect(x - offset - square/2, y - square/2, square, square);
+
+        // Draw connection squares based on required connections
+        if (fromPrev) {
+            let dir = OPP[fromPrev.name];
+            switch(dir) {
+                case 'north':
+                    ctx.fillRect(x - squareSize/2, y - offset, squareSize, squareSize);
+                    break;
+                case 'east':
+                    ctx.fillRect(x + offset - squareSize, y - squareSize/2, squareSize, squareSize);
+                    break;
+                case 'south':
+                    ctx.fillRect(x - squareSize/2, y + offset - squareSize, squareSize, squareSize);
+                    break;
+                case 'west':
+                    ctx.fillRect(x - offset, y - squareSize/2, squareSize, squareSize);
+                    break;
+            }
+        }
+        
+        if (toNext) {
+            let dir = toNext.name;
+            switch(dir) {
+                case 'north':
+                    ctx.fillRect(x - squareSize/2, y - offset, squareSize, squareSize);
+                    break;
+                case 'east':
+                    ctx.fillRect(x + offset - squareSize, y - squareSize/2, squareSize, squareSize);
+                    break;
+                case 'south':
+                    ctx.fillRect(x - squareSize/2, y + offset - squareSize, squareSize, squareSize);
+                    break;
+                case 'west':
+                    ctx.fillRect(x - offset, y - squareSize/2, squareSize, squareSize);
+                    break;
+            }
+        }
     }
     ctx.restore();
 }
