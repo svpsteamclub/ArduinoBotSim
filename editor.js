@@ -6,7 +6,7 @@ require(['vs/editor/editor.main'], function() {
     const editor = monaco.editor.create(document.getElementById('editor'), {
         value: '// Escribe tu código Arduino aquí\nvoid setup() {\n  // Configuración inicial\n}\n\nvoid loop() {\n  // Código principal\n}',
         language: 'cpp',
-        theme: 'vs-dark',
+        theme: 'vs',
         automaticLayout: true,
         minimap: {
             enabled: true
