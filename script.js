@@ -79,4 +79,83 @@ document.addEventListener('DOMContentLoaded', () => {
             mobileMenuButton.classList.remove('active');
         }
     });
-}); 
+});
+
+// Canvas setup
+const canvas = document.getElementById('pistaCanvas');
+const ctx = canvas.getContext('2d');
+const CELL_SIZE = 350; // Size of each cell in pixels
+let currentSize = 3; // Default size
+let scale = 1; // Scale factor for the canvas
+
+// Function to calculate the appropriate scale
+function calculateScale(size) {
+    const container = canvas.parentElement;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    const canvasSize = size * CELL_SIZE;
+    
+    // Calculate scale based on both width and height
+    const scaleX = containerWidth / canvasSize;
+    const scaleY = containerHeight / canvasSize;
+    
+    // Use the smaller scale to ensure the canvas fits both dimensions
+    return Math.min(scaleX, scaleY);
+}
+
+// Function to resize canvas based on selected size
+function resizeCanvas(size) {
+    const canvasSize = size * CELL_SIZE;
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+    scale = calculateScale(size);
+    drawGrid(size);
+}
+
+// Function to draw the grid
+function drawGrid(size) {
+    const canvasSize = size * CELL_SIZE;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvasSize, canvasSize);
+    
+    // Set grid line style
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    
+    // Draw vertical lines
+    for (let i = 1; i < size; i++) {
+        const x = i * CELL_SIZE;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvasSize);
+        ctx.stroke();
+    }
+    
+    // Draw horizontal lines
+    for (let i = 1; i < size; i++) {
+        const y = i * CELL_SIZE;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvasSize, y);
+        ctx.stroke();
+    }
+}
+
+// Handle size selection
+document.querySelectorAll('.dropdown-content a').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const size = parseInt(e.target.dataset.size);
+        currentSize = size;
+        resizeCanvas(size);
+    });
+});
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    resizeCanvas(currentSize);
+});
+
+// Initialize canvas with default size
+resizeCanvas(currentSize); 
