@@ -25,13 +25,13 @@ export const AVAILABLE_TRACK_PARTS = [
         name: 'C1.02-MCS',
         file: 'C1.02-MCS.png',
         description: 'Curva Cerrada',
-        connections: { N: false, E: false, S: true, W: true }
+        connections: { N: false, E: true, S: true, W: false }
     },
     {
         name: 'C1.03-CCS',
         file: 'C1.03-CCS.png',
         description: 'Curva Abierta',
-        connections: { N: false, E: true, S: true, W: false }
+        connections: { N: false, E: false, S: true, W: true }
     },
     {
         name: 'C1.04-MCS',
