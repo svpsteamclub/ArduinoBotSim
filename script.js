@@ -119,21 +119,35 @@ function resizeCanvas(size) {
 }
 
 // Function to draw connection indicators on the canvas
-function drawConnectionIndicators(partKey, x, y, cellSize) {
+function drawConnectionIndicators(partKey, x, y, cellSize, rotation = 0) {
     const conn = trackConnections[partKey];
     if (!conn) return;
-    const size = 12; // indicator size
+    const size = 12;
+    // Helper to rotate a direction
+    function rotateDir(dir, rot) {
+        const dirs = ['north', 'east', 'south', 'west'];
+        let idx = dirs.indexOf(dir);
+        return dirs[(idx + rot) % 4];
+    }
+    // Rotate connection states
+    const rot = ((rotation % 360) + 360) % 360;
+    const steps = Math.round(rot / 90) % 4;
+    const dirs = ['north', 'east', 'south', 'west'];
+    const rotated = {};
+    dirs.forEach((dir, i) => {
+        rotated[dirs[(i + steps) % 4]] = conn[dir];
+    });
     // North
-    ctx.fillStyle = conn.north ? '#2ecc40' : '#ff4136';
+    ctx.fillStyle = rotated.north ? '#2ecc40' : '#ff4136';
     ctx.fillRect(x + cellSize/2 - size/2, y + 2, size, size);
     // East
-    ctx.fillStyle = conn.east ? '#2ecc40' : '#ff4136';
+    ctx.fillStyle = rotated.east ? '#2ecc40' : '#ff4136';
     ctx.fillRect(x + cellSize - size - 2, y + cellSize/2 - size/2, size, size);
     // South
-    ctx.fillStyle = conn.south ? '#2ecc40' : '#ff4136';
+    ctx.fillStyle = rotated.south ? '#2ecc40' : '#ff4136';
     ctx.fillRect(x + cellSize/2 - size/2, y + cellSize - size - 2, size, size);
     // West
-    ctx.fillStyle = conn.west ? '#2ecc40' : '#ff4136';
+    ctx.fillStyle = rotated.west ? '#2ecc40' : '#ff4136';
     ctx.fillRect(x + 2, y + cellSize/2 - size/2, size, size);
 }
 
@@ -167,17 +181,21 @@ function drawGrid(size) {
     }
 
     // Redraw all placed parts
-    placedParts.forEach((partName, cellIndex) => {
+    placedParts.forEach((partObj, cellIndex) => {
+        const { name, rotation = 0 } = typeof partObj === 'string' ? { name: partObj, rotation: 0 } : partObj;
         const cellSize = canvas.width / size;
         const x = (cellIndex % size) * cellSize;
         const y = Math.floor(cellIndex / size) * cellSize;
         const img = new Image();
-        img.src = `assets/track-parts/${partName}`;
+        img.src = `assets/track-parts/${name}`;
         img.onload = () => {
-            ctx.drawImage(img, x, y, cellSize, cellSize);
-            // Draw connection indicators after image loads
-            const partKey = partName.replace('.png', '');
-            drawConnectionIndicators(partKey, x, y, cellSize);
+            ctx.save();
+            ctx.translate(x + cellSize/2, y + cellSize/2);
+            ctx.rotate((rotation * Math.PI) / 180);
+            ctx.drawImage(img, -cellSize/2, -cellSize/2, cellSize, cellSize);
+            ctx.restore();
+            const partKey = name.replace('.png', '');
+            drawConnectionIndicators(partKey, x, y, cellSize, rotation);
         };
     });
 }
@@ -232,7 +250,7 @@ let trackParts = [];
 let selectedPart = null;
 let selectedCell = null;
 let canvasCells = [];
-let placedParts = new Map(); // Map to store placed parts: cellIndex -> partName
+let placedParts = new Map(); // Map: cellIndex -> { name, rotation }
 
 // Static list of track parts
 const TRACK_PARTS = [
@@ -316,16 +334,12 @@ function loadTrackParts() {
 
 // Function to create canvas cells
 function createCanvasCells(size) {
-    // Remove all existing .canvas-cell overlays from the DOM
     const container = canvas.parentElement;
     container.querySelectorAll('.canvas-cell').forEach(cell => cell.remove());
     canvasCells = [];
-    
-    // Use the canvas's displayed size for cell overlays
     const rect = canvas.getBoundingClientRect();
     const cellWidth = rect.width / size;
     const cellHeight = rect.height / size;
-    
     for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
             const cell = document.createElement('div');
@@ -334,21 +348,24 @@ function createCanvasCells(size) {
             cell.style.height = `${cellHeight}px`;
             cell.style.left = `${x * cellWidth}px`;
             cell.style.top = `${y * cellHeight}px`;
-            
             const cellIndex = y * size + x;
-            
-            // Add click event for part placement
             cell.addEventListener('click', () => {
                 if (selectedPart) {
-                    // Place part
                     placePart(cellIndex, selectedPart);
                 } else if (placedParts.has(cellIndex)) {
-                    // Select placed part
                     selectCell(cellIndex);
                 }
             });
-            
-            // Append to canvas container, not canvas
+            // Double-click to rotate
+            cell.addEventListener('dblclick', (e) => {
+                e.preventDefault();
+                if (placedParts.has(cellIndex)) {
+                    const partObj = placedParts.get(cellIndex);
+                    const newRot = ((partObj.rotation || 0) + 90) % 360;
+                    placedParts.set(cellIndex, { name: partObj.name, rotation: newRot });
+                    drawGrid(currentSize);
+                }
+            });
             container.appendChild(cell);
             canvasCells.push(cell);
         }
@@ -357,8 +374,7 @@ function createCanvasCells(size) {
 
 // Function to place a part
 function placePart(cellIndex, partName) {
-    // Replace any existing part in this cell
-    placedParts.set(cellIndex, partName);
+    placedParts.set(cellIndex, { name: partName, rotation: 0 });
     drawGrid(currentSize);
     selectCell(cellIndex);
 }
