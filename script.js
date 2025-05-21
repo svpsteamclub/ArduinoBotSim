@@ -159,6 +159,35 @@ function drawGrid(size) {
     });
 }
 
+// Dropdown open/close logic for Tamaño
+const tamanoDropdown = document.querySelector('.dropdown');
+const tamanoButton = document.getElementById('tamano');
+const tamanoDropdownContent = tamanoDropdown.querySelector('.dropdown-content');
+
+tamanoButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    tamanoDropdown.classList.toggle('open');
+});
+
+tamanoDropdownContent.addEventListener('click', (e) => {
+    e.stopPropagation();
+});
+
+document.addEventListener('click', (e) => {
+    if (tamanoDropdown.classList.contains('open')) {
+        if (!tamanoDropdown.contains(e.target)) {
+            tamanoDropdown.classList.remove('open');
+        }
+    }
+});
+
+// When a size is picked, close the dropdown
+tamanoDropdownContent.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+        tamanoDropdown.classList.remove('open');
+    });
+});
+
 // Handle size selection
 document.querySelectorAll('.dropdown-content a').forEach(link => {
     link.addEventListener('click', (e) => {
@@ -195,6 +224,19 @@ const TRACK_PARTS = [
     'C2.08-MCS.png'
 ];
 
+// Track part connection states
+const trackConnections = {
+  "C0.00-BCS": { north: false, east: false, south: false, west: false },
+  "C1.01-RCS": { north: true,  east: false, south: true,  west: false },
+  "C1.02-MCS": { north: false, east: true,  south: true,  west: false },
+  "C1.03-CCS": { north: false, east: false, south: true,  west: true  },
+  "C1.04-MCS": { north: false, east: true,  south: true,  west: false },
+  "C1.05-RCS": { north: false, east: true,  south: true,  west: false },
+  "C1.06-MCS": { north: false, east: true,  south: true,  west: false },
+  "C2.07-RCI": { north: false, east: true,  south: true,  west: false },
+  "C2.08-MCS": { north: true,  east: false, south: true,  west: false }
+};
+
 // Function to load track parts
 function loadTrackParts() {
     TRACK_PARTS.forEach(fileName => {
@@ -202,6 +244,32 @@ function loadTrackParts() {
         part.className = 'track-part';
         part.dataset.part = fileName;
         part.style.backgroundImage = `url('assets/track-parts/${fileName}')`;
+        
+        // Add connection indicators
+        const partKey = fileName.replace('.png', '');
+        const conn = trackConnections[partKey];
+        if (conn) {
+            // North
+            const north = document.createElement('div');
+            north.className = 'conn-indicator north';
+            north.style.background = conn.north ? '#2ecc40' : '#ff4136';
+            part.appendChild(north);
+            // East
+            const east = document.createElement('div');
+            east.className = 'conn-indicator east';
+            east.style.background = conn.east ? '#2ecc40' : '#ff4136';
+            part.appendChild(east);
+            // South
+            const south = document.createElement('div');
+            south.className = 'conn-indicator south';
+            south.style.background = conn.south ? '#2ecc40' : '#ff4136';
+            part.appendChild(south);
+            // West
+            const west = document.createElement('div');
+            west.className = 'conn-indicator west';
+            west.style.background = conn.west ? '#2ecc40' : '#ff4136';
+            part.appendChild(west);
+        }
         
         // Add click event for selection
         part.addEventListener('click', () => {
