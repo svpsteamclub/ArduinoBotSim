@@ -488,10 +488,8 @@ function generateRandomLoopTrackScriptJS() {
     // Clear canvas and draw grid
     drawGrid(currentSize);
 
-    // Draw the path and connection points
-    ctx.save();
-    
     // Draw the path line
+    ctx.save();
     ctx.strokeStyle = '#e67e22';
     ctx.lineWidth = 6;
     ctx.lineJoin = 'round';
@@ -506,63 +504,40 @@ function generateRandomLoopTrackScriptJS() {
     }
     ctx.closePath();
     ctx.stroke();
+    ctx.restore();
 
-    // Draw connection points for each cell
+    // --- Accumulate required connections for each cell ---
     const OPP = { north: 'south', east: 'west', south: 'north', west: 'east' };
-    ctx.fillStyle = '#3498db';
-    const squareSize = CELL_SIZE * 0.15;
-    const offset = CELL_SIZE * 0.35;
-
+    let cellConnections = {}; // key: "r,c", value: { north, east, south, west }
     for (let i = 0; i < path.length - 1; i++) {
         let [r, c] = path[i];
-        let [pr, pc] = i === 0 ? path[path.length - 2] : path[i - 1];
         let [nr, nc] = path[i + 1];
-        
-        // Find directions from previous and to next cell
-        let fromPrev = DIRS.find(d => pr === r + d.dr && pc === c + d.dc);
+        let key = `${r},${c}`;
+        if (!cellConnections[key]) cellConnections[key] = { north: false, east: false, south: false, west: false };
+        // Find direction to next
         let toNext = DIRS.find(d => nr === r + d.dr && nc === c + d.dc);
-        
-        // Calculate cell center
-        let cellSize = canvas.width / size;
-        let x = c * cellSize + cellSize / 2;
-        let y = r * cellSize + cellSize / 2;
+        if (toNext) cellConnections[key][toNext.name] = true;
+        // For the next cell, mark the opposite direction
+        let nextKey = `${nr},${nc}`;
+        if (!cellConnections[nextKey]) cellConnections[nextKey] = { north: false, east: false, south: false, west: false };
+        if (toNext) cellConnections[nextKey][OPP[toNext.name]] = true;
+    }
 
-        // Draw connection squares based on required connections
-        if (fromPrev) {
-            let dir = OPP[fromPrev.name];
-            switch(dir) {
-                case 'north':
-                    ctx.fillRect(x - squareSize/2, y - offset, squareSize, squareSize);
-                    break;
-                case 'east':
-                    ctx.fillRect(x + offset - squareSize, y - squareSize/2, squareSize, squareSize);
-                    break;
-                case 'south':
-                    ctx.fillRect(x - squareSize/2, y + offset - squareSize, squareSize, squareSize);
-                    break;
-                case 'west':
-                    ctx.fillRect(x - offset, y - squareSize/2, squareSize, squareSize);
-                    break;
-            }
-        }
-        
-        if (toNext) {
-            let dir = toNext.name;
-            switch(dir) {
-                case 'north':
-                    ctx.fillRect(x - squareSize/2, y - offset, squareSize, squareSize);
-                    break;
-                case 'east':
-                    ctx.fillRect(x + offset - squareSize, y - squareSize/2, squareSize, squareSize);
-                    break;
-                case 'south':
-                    ctx.fillRect(x - squareSize/2, y + offset - squareSize, squareSize, squareSize);
-                    break;
-                case 'west':
-                    ctx.fillRect(x - offset, y - squareSize/2, squareSize, squareSize);
-                    break;
-            }
-        }
+    // --- Draw blue squares for each required connection per cell ---
+    ctx.save();
+    ctx.fillStyle = '#3498db';
+    const cellSize = canvas.width / size;
+    const squareSize = cellSize * 0.18;
+    const offset = cellSize * 0.38;
+    for (const key in cellConnections) {
+        const [r, c] = key.split(',').map(Number);
+        const x = c * cellSize + cellSize / 2;
+        const y = r * cellSize + cellSize / 2;
+        const conn = cellConnections[key];
+        if (conn.north) ctx.fillRect(x - squareSize/2, y - offset, squareSize, squareSize);
+        if (conn.east)  ctx.fillRect(x + offset - squareSize, y - squareSize/2, squareSize, squareSize);
+        if (conn.south) ctx.fillRect(x - squareSize/2, y + offset - squareSize, squareSize, squareSize);
+        if (conn.west)  ctx.fillRect(x - offset, y - squareSize/2, squareSize, squareSize);
     }
     ctx.restore();
 }
