@@ -453,7 +453,7 @@ p {
 .pista-button {
     flex: 1 1 0;
     min-width: 0;
-    height: 48px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -461,13 +461,13 @@ p {
 }
 
 .dropdown {
-    height: 48px;
+    height: 28px;
     display: flex;
     align-items: center;
 }
 
 .dropdown .pista-button {
-    height: 30px;
+    height: 28px;
     font-size: 0.8rem;
 }
 
@@ -503,4 +503,11 @@ p {
     left: 2px;
     top: 50%;
     transform: translateY(-50%);
+}
+
+/* Minimalist connection indicators for part list */
+.parts-list .conn-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
 } 
