@@ -19,7 +19,7 @@ export const AVAILABLE_TRACK_PARTS = [
         name: 'C1.01-RCS',
         file: 'C1.01-RCS.png',
         description: 'Recta',
-        connections: { N: true, E: fasle, S: true, W: false }
+        connections: { N: true, E: false, S: true, W: false }
     },
     {
         name: 'C1.02-MCS',
