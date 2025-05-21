@@ -167,11 +167,15 @@ let draggedPart = null;
 
 // Static list of track parts
 const TRACK_PARTS = [
-    'straight.png',
-    'curve.png',
-    'cross.png',
-    'start.png',
-    'finish.png'
+    'C0.00-BCS.png',
+    'C1.01-RCS.png',
+    'C1.02-MCS.png',
+    'C1.03-CCS.png',
+    'C1.04-MCS.png',
+    'C1.05-RCS.png',
+    'C1.06-MCS.png',
+    'C2.07-RCI.png',
+    'C2.08-MCS.png'
 ];
 
 // Function to load track parts
