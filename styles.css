@@ -316,30 +316,33 @@ p {
 }
 
 .pista-layout {
-    display: flex;
-    gap: 2rem;
     margin-top: 2rem;
 }
 
+.pista-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
 .parts-sidebar {
-    width: 250px;
     background-color: white;
     border-radius: 8px;
-    padding: 1.5rem;
+    padding: 1rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    height: fit-content;
 }
 
 .parts-sidebar h2 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
     color: var(--primary-color);
+    font-weight: 500;
 }
 
 .parts-list {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
 }
 
 .track-part {
@@ -362,8 +365,4 @@ p {
 .track-part.dragging {
     opacity: 0.5;
     transform: scale(1.1);
-}
-
-.pista-main {
-    flex: 1;
 } 
