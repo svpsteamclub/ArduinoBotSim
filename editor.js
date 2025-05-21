@@ -13,22 +13,8 @@ require(['vs/editor/editor.main'], function() {
         },
         fontSize: 14,
         tabSize: 2,
-        readOnly: false, // Explicitly set to false to ensure editing is enabled
+        readOnly: false,
         scrollBeyondLastLine: false,
         wordWrap: 'on'
-    });
-
-    // Handle compile button click
-    document.getElementById('compile-btn').addEventListener('click', function() {
-        const code = editor.getValue();
-        // TODO: Implement compilation logic
-        console.log('Compiling code:', code);
-    });
-
-    // Handle upload button click
-    document.getElementById('upload-btn').addEventListener('click', function() {
-        const code = editor.getValue();
-        // TODO: Implement upload logic
-        console.log('Uploading code:', code);
     });
 }); 
