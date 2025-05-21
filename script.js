@@ -586,4 +586,107 @@ function generateRandomLoopTrackScriptJS() {
 const aleatoriaBtn = document.getElementById('crear-aleatoria');
 if (aleatoriaBtn) {
     aleatoriaBtn.addEventListener('click', generateRandomLoopTrackScriptJS);
+}
+
+// Add save track functionality
+function saveTrackToJSON() {
+    const trackData = {
+        gridSize: currentSize,
+        parts: Array.from(placedParts.entries()).map(([cellIndex, partData]) => ({
+            position: cellIndex,
+            partName: partData.name,
+            rotation: partData.rotation || 0
+        }))
+    };
+
+    // Convert to JSON string
+    const jsonString = JSON.stringify(trackData, null, 2);
+    
+    // Create a blob with the JSON data
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    
+    // Create a download link
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `track_config_${new Date().toISOString().slice(0,10)}.json`;
+    
+    // Trigger the download
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Add event listener for the guardar button
+const guardarBtn = document.getElementById('guardar');
+if (guardarBtn) {
+    guardarBtn.addEventListener('click', saveTrackToJSON);
+}
+
+// Add load track functionality
+function loadTrackFromJSON() {
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json';
+    
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const trackData = JSON.parse(e.target.result);
+                
+                // Validate the track data
+                if (!trackData.gridSize || !Array.isArray(trackData.parts)) {
+                    throw new Error('Invalid track configuration format');
+                }
+
+                // Update grid size if needed
+                if (trackData.gridSize !== currentSize) {
+                    currentSize = trackData.gridSize;
+                    resizeCanvas(currentSize);
+                }
+
+                // Clear existing parts
+                placedParts.clear();
+
+                // Load the parts
+                trackData.parts.forEach(part => {
+                    if (part.position !== undefined && part.partName) {
+                        placedParts.set(part.position, {
+                            name: part.partName,
+                            rotation: part.rotation || 0
+                        });
+                    }
+                });
+
+                // Redraw the grid with loaded parts
+                drawGrid(currentSize);
+
+            } catch (error) {
+                alert('Error loading track configuration: ' + error.message);
+            }
+        };
+
+        reader.onerror = () => {
+            alert('Error reading the file');
+        };
+
+        reader.readAsText(file);
+    });
+
+    // Trigger file input click
+    fileInput.click();
+}
+
+// Add event listener for the cargar button
+const cargarBtn = document.getElementById('cargar');
+if (cargarBtn) {
+    cargarBtn.addEventListener('click', loadTrackFromJSON);
 } 
