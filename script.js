@@ -430,28 +430,19 @@ loadTrackParts();
 
 // --- Minimalist Random Loop Track Generation ---
 function generateRandomLoopTrackScriptJS() {
-    // Clear current grid
     placedParts.clear();
     const size = currentSize;
-    const totalCells = size * size;
-    // Helper: get [row, col] from index
-    const idx2rc = idx => [Math.floor(idx / size), idx % size];
-    const rc2idx = (r, c) => r * size + c;
-    // Directions
     const DIRS = [
         { name: 'north', dr: -1, dc: 0 },
         { name: 'east', dr: 0, dc: 1 },
         { name: 'south', dr: 1, dc: 0 },
         { name: 'west', dr: 0, dc: -1 }
     ];
-    const OPP = { north: 'south', east: 'west', south: 'north', west: 'east' };
-    // 1. Generate a closed loop path
+    let found = false;
     let path = [];
-    let visited = new Set();
-    let tries = 0;
-    while (tries < 40 && path.length < 4) { // Try up to 40 times for a valid loop
+    for (let attempt = 0; attempt < 10 && !found; attempt++) {
         path = [];
-        visited.clear();
+        let visited = new Set();
         // Start at random cell
         let r = Math.floor(Math.random() * size);
         let c = Math.floor(Math.random() * size);
@@ -462,7 +453,6 @@ function generateRandomLoopTrackScriptJS() {
         let maxLen = Math.floor(size * size * 0.9);
         let stuck = 0;
         for (let i = 0; i < maxLen * 2 && path.length < maxLen; i++) {
-            // Shuffle directions
             let dirs = DIRS.slice().sort(() => Math.random() - 0.5);
             let moved = false;
             for (let dir of dirs) {
@@ -486,19 +476,18 @@ function generateRandomLoopTrackScriptJS() {
                 } else break;
             }
         }
-        // Try to close the loop
+        // Try to close the loop (only if strictly adjacent to start)
         let [sr, sc] = path[0];
         let [er, ec] = path[path.length - 1];
         let canClose = DIRS.some(dir => er + dir.dr === sr && ec + dir.dc === sc);
         if (canClose && path.length >= minLen) {
             path.push([sr, sc]);
-            break;
+            found = true;
         }
-        tries++;
     }
-    if (path.length < 4) return alert('No se pudo generar un bucle.');
-    // 2. DEBUG: Draw the path as a minimalist line on the canvas
-    drawGrid(currentSize); // Draw grid only, no parts
+    if (!found) return alert('No se pudo generar un bucle después de varios intentos.');
+    // Draw the path as a minimalist line on the canvas
+    drawGrid(currentSize);
     ctx.save();
     ctx.strokeStyle = '#e67e22';
     ctx.lineWidth = 6;
@@ -514,7 +503,6 @@ function generateRandomLoopTrackScriptJS() {
     }
     ctx.closePath();
     ctx.stroke();
-    // Optionally, draw dots for each cell in the path
     ctx.fillStyle = '#e74c3c';
     for (let i = 0; i < path.length; i++) {
         let [r, c] = path[i];
