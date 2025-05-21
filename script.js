@@ -386,7 +386,7 @@ function drawGrid(size) {
     // Clear canvas
     ctx.clearRect(0, 0, canvasSize, canvasSize);
     // Set grid line style
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = '#eeeeee'; // very light grey
     ctx.lineWidth = 2;
     // Draw vertical lines
     for (let i = 1; i < size; i++) {
