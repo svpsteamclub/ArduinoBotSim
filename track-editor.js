@@ -406,6 +406,7 @@ class TrackEditor {
             const { r, c, connections } = cellInfo;
             let placed = false;
             const shuffledParts = [...loopParts].sort(() => 0.5 - Math.random());
+            console.log(`\nCell [${r},${c}] requires connections:`, connections);
             for (const part of shuffledParts) {
                 const rotations = [0, 90, 180, 270].sort(() => 0.5 - Math.random());
                 for (const rot of rotations) {
@@ -417,6 +418,7 @@ class TrackEditor {
                             if (!rotatedConnections[dir]) { match = false; break; }
                         }
                     }
+                    console.log(`  Trying part '${part.name}' at rotation ${rot}:`, rotatedConnections, 'Match?', match);
                     if (match) {
                         this.trackParts.push({
                             type: part.name,
