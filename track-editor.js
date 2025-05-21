@@ -302,170 +302,140 @@ class TrackEditor {
     }
 
     generateRandomTrack() {
-        this.trackParts = [];
-        const numParts = this.gridSize * this.gridSize;
-        const centerRow = Math.floor(this.gridSize / 2);
-        const centerCol = Math.floor(this.gridSize / 2);
+        // Step 1: Generate a random loop path with required connections
+        const gridRows = this.gridSize;
+        const gridCols = this.gridSize;
+        const minPathLength = Math.max(4, Math.floor((gridRows * gridCols) * 0.40));
+        const maxPathLength = Math.floor((gridRows * gridCols) * 0.90);
+        let grid = Array(gridRows).fill(null).map(() => Array(gridCols).fill(null));
 
-        // First, generate a random loop path
-        const path = this.generateRandomLoop(centerRow, centerCol);
-        if (!path) {
-            console.error("Could not generate a valid loop path");
+        // --- Generate random loop path ---
+        function getRandomInt(max) { return Math.floor(Math.random() * max); }
+        const OPPOSITE = { N: 'S', S: 'N', E: 'W', W: 'E' };
+        const DIRS = [
+            { name: 'N', dr: -1, dc: 0 },
+            { name: 'E', dr: 0, dc: 1 },
+            { name: 'S', dr: 1, dc: 0 },
+            { name: 'W', dr: 0, dc: -1 }
+        ];
+        let path = [];
+        let visited = new Set();
+        let startR = getRandomInt(gridRows);
+        let startC = getRandomInt(gridCols);
+        let currentR = startR, currentC = startC;
+        path.push({ r: currentR, c: currentC });
+        visited.add(`${currentR},${currentC}`);
+        let stuckCounter = 0;
+        for (let k = 0; k < maxPathLength * 2 && path.length < maxPathLength; k++) {
+            let dirs = [...DIRS].sort(() => 0.5 - Math.random());
+            let moved = false;
+            for (const dir of dirs) {
+                let nr = currentR + dir.dr, nc = currentC + dir.dc;
+                if (nr >= 0 && nr < gridRows && nc >= 0 && nc < gridCols && !visited.has(`${nr},${nc}`)) {
+                    if (path.length < minPathLength / 2) {
+                        let isEdge = (nr === 0 || nr === gridRows - 1 || nc === 0 || nc === gridCols - 1);
+                        if (isEdge && dirs.length > 1 && Math.random() < 0.6) continue;
+                    }
+                    currentR = nr; currentC = nc;
+                    path.push({ r: currentR, c: currentC });
+                    visited.add(`${currentR},${currentC}`);
+                    moved = true; stuckCounter = 0; break;
+                }
+            }
+            if (!moved) {
+                stuckCounter++;
+                if (stuckCounter > 5 && path.length >= minPathLength) break;
+                if (stuckCounter > 10) break;
+                if (path.length > 1) {
+                    visited.delete(`${currentR},${currentC}`); path.pop();
+                    currentR = path[path.length - 1].r; currentC = path[path.length - 1].c;
+                } else { break; }
+            }
+            if (path.length >= maxPathLength) break;
+        }
+        // Try to close the loop
+        let loopClosed = false;
+        for (const dir of DIRS) {
+            if (currentR + dir.dr === startR && currentC + dir.dc === startC) {
+                path.push({ r: startR, c: startC });
+                loopClosed = true; break;
+            }
+        }
+        if (!loopClosed || path.length < minPathLength) {
+            console.warn('Could not generate a valid loop path');
             return;
         }
-
-        // Then, fill each position with an appropriate part
-        for (const position of path) {
-            const { row, col, connections } = position;
-            
-            // Find all parts that could match these connections
-            const compatibleParts = AVAILABLE_TRACK_PARTS.filter(part => {
-                // Check if the part has all the required connections
-                return Object.entries(connections).every(([dir, hasConnection]) => {
-                    if (!hasConnection) return true; // If no connection needed, any part is fine
-                    return part.connections[dir];
-                });
+        // Step 2: For each cell, determine required connections
+        let pathWithConnections = [];
+        for (let i = 0; i < path.length - 1; i++) {
+            const cell = path[i];
+            const prevCell = (i === 0) ? path[path.length - 2] : path[i - 1];
+            const nextCell = path[i + 1];
+            function getDir(from, to) {
+                if (to.r === from.r - 1 && to.c === from.c) return 'N';
+                if (to.r === from.r + 1 && to.c === from.c) return 'S';
+                if (to.r === from.r && to.c === from.c - 1) return 'W';
+                if (to.r === from.r && to.c === from.c + 1) return 'E';
+                return null;
+            }
+            const dirFromPrev = getDir(prevCell, cell);
+            const dirToNext = getDir(cell, nextCell);
+            if (!dirFromPrev || !dirToNext) {
+                console.error('Error determining directions for path connections.');
+                return;
+            }
+            pathWithConnections.push({
+                r: cell.r, c: cell.c,
+                connections: { [OPPOSITE[dirFromPrev]]: true, [dirToNext]: true }
             });
-
-            if (compatibleParts.length > 0) {
-                // Select a random compatible part
-                const selectedPart = compatibleParts[Math.floor(Math.random() * compatibleParts.length)];
-                
-                // Try different rotations until we find one that matches
-                let validRotation = false;
-                let rotation = 0;
-                
-                while (!validRotation && rotation < 360) {
-                    const rotatedConnections = this.getRotatedConnections({
-                        connections: selectedPart.connections,
-                        rotation
-                    });
-                    
-                    // Check if this rotation matches our required connections
-                    validRotation = Object.entries(connections).every(([dir, hasConnection]) => {
-                        if (!hasConnection) return true;
-                        return rotatedConnections[dir];
-                    });
-                    
-                    if (!validRotation) {
-                        rotation += 90;
+        }
+        // Step 3: Place parts with matching connections
+        // Only use parts with exactly 2 connections
+        const loopParts = AVAILABLE_TRACK_PARTS.filter(p => {
+            if (!p.connections) return false;
+            return Object.values(p.connections).filter(conn => conn === true).length === 2;
+        });
+        if (loopParts.length === 0) {
+            alert('No hay partes de pista adecuadas (con exactamente 2 conexiones) en config.js para generar un bucle.');
+            return;
+        }
+        let allPartsPlaced = true;
+        this.trackParts = [];
+        for (const cellInfo of pathWithConnections) {
+            const { r, c, connections } = cellInfo;
+            let placed = false;
+            const shuffledParts = [...loopParts].sort(() => 0.5 - Math.random());
+            for (const part of shuffledParts) {
+                const rotations = [0, 90, 180, 270].sort(() => 0.5 - Math.random());
+                for (const rot of rotations) {
+                    const rotatedConnections = this.getRotatedConnections({ connections: part.connections, rotation: rot });
+                    let match = true;
+                    if (Object.keys(rotatedConnections).length !== 2 || Object.keys(connections).length !== 2) { match = false; }
+                    else {
+                        for (const dir in connections) {
+                            if (!rotatedConnections[dir]) { match = false; break; }
+                        }
+                    }
+                    if (match) {
+                        this.trackParts.push({
+                            type: part.name,
+                            row: r,
+                            col: c,
+                            rotation: rot,
+                            connections: part.connections
+                        });
+                        placed = true;
+                        break;
                     }
                 }
-
-                if (validRotation) {
-                    this.trackParts.push({
-                        type: selectedPart.name,
-                        row,
-                        col,
-                        rotation,
-                        connections: selectedPart.connections
-                    });
-                }
+                if (placed) break;
+            }
+            if (!placed) {
+                allPartsPlaced = false;
+                console.error(`Could not find suitable part for cell [${r},${c}] with connections ${JSON.stringify(connections)}`);
             }
         }
-
         this.drawTrack();
-    }
-
-    generateRandomLoop(startRow, startCol) {
-        const path = [];
-        const visited = new Set();
-        const grid = Array(this.gridSize).fill().map(() => Array(this.gridSize).fill(false));
-        
-        // Helper function to get valid moves from a position
-        const getValidMoves = (row, col) => {
-            const moves = [];
-            const directions = [
-                { dir: 'N', row: -1, col: 0 },
-                { dir: 'E', row: 0, col: 1 },
-                { dir: 'S', row: 1, col: 0 },
-                { dir: 'W', row: 0, col: -1 }
-            ];
-            
-            for (const { dir, row: dRow, col: dCol } of directions) {
-                const newRow = row + dRow;
-                const newCol = col + dCol;
-                
-                if (newRow >= 0 && newRow < this.gridSize && 
-                    newCol >= 0 && newCol < this.gridSize && 
-                    !grid[newRow][newCol]) {
-                    moves.push({ dir, row: newRow, col: newCol });
-                }
-            }
-            
-            return moves;
-        };
-
-        // Helper function to check if we can return to start
-        const canReturnToStart = (row, col) => {
-            const directions = [
-                { dir: 'N', row: -1, col: 0 },
-                { dir: 'E', row: 0, col: 1 },
-                { dir: 'S', row: 1, col: 0 },
-                { dir: 'W', row: 0, col: -1 }
-            ];
-            
-            for (const { dir, row: dRow, col: dCol } of directions) {
-                const newRow = row + dRow;
-                const newCol = col + dCol;
-                
-                if (newRow === startRow && newCol === startCol) {
-                    return true;
-                }
-            }
-            
-            return false;
-        };
-
-        // Recursive function to generate the path
-        const generatePath = (row, col, connections = {}) => {
-            if (row === startRow && col === startCol && path.length > 0) {
-                return true;
-            }
-
-            grid[row][col] = true;
-            path.push({ row, col, connections: { ...connections } });
-
-            const moves = getValidMoves(row, col);
-            while (moves.length > 0) {
-                const moveIndex = Math.floor(Math.random() * moves.length);
-                const move = moves.splice(moveIndex, 1)[0];
-                
-                // Update connections for current position
-                const currentPos = path[path.length - 1];
-                currentPos.connections[move.dir] = true;
-                
-                // Create new connections object for next position
-                const nextConnections = { ...currentPos.connections };
-                const oppositeDir = {
-                    'N': 'S',
-                    'E': 'W',
-                    'S': 'N',
-                    'W': 'E'
-                }[move.dir];
-                nextConnections[oppositeDir] = true;
-                
-                if (generatePath(move.row, move.col, nextConnections)) {
-                    return true;
-                }
-            }
-
-            // If we can't continue and we're not at the start, backtrack
-            if (row !== startRow || col !== startCol) {
-                grid[row][col] = false;
-                path.pop();
-                return false;
-            }
-
-            return false;
-        };
-
-        // Start the path generation
-        if (generatePath(startRow, startCol)) {
-            return path;
-        }
-
-        return null;
     }
 
     exportTrack() {
