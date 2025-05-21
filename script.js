@@ -165,35 +165,31 @@ const partsList = document.querySelector('.parts-list');
 let trackParts = [];
 let draggedPart = null;
 
+// Static list of track parts
+const TRACK_PARTS = [
+    'straight.png',
+    'curve.png',
+    'cross.png',
+    'start.png',
+    'finish.png'
+];
+
 // Function to load track parts
-async function loadTrackParts() {
-    try {
-        const response = await fetch('track-parts/');
-        const files = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(files, 'text/html');
-        const links = doc.querySelectorAll('a');
+function loadTrackParts() {
+    TRACK_PARTS.forEach(fileName => {
+        const part = document.createElement('div');
+        part.className = 'track-part';
+        part.draggable = true;
+        part.dataset.part = fileName;
+        part.style.backgroundImage = `url('assets/track-parts/${fileName}')`;
         
-        links.forEach(link => {
-            const fileName = link.href.split('/').pop();
-            if (fileName.endsWith('.png')) {
-                const part = document.createElement('div');
-                part.className = 'track-part';
-                part.draggable = true;
-                part.dataset.part = fileName;
-                part.style.backgroundImage = `url('track-parts/${fileName}')`;
-                
-                // Add drag events
-                part.addEventListener('dragstart', handleDragStart);
-                part.addEventListener('dragend', handleDragEnd);
-                
-                partsList.appendChild(part);
-                trackParts.push(part);
-            }
-        });
-    } catch (error) {
-        console.error('Error loading track parts:', error);
-    }
+        // Add drag events
+        part.addEventListener('dragstart', handleDragStart);
+        part.addEventListener('dragend', handleDragEnd);
+        
+        partsList.appendChild(part);
+        trackParts.push(part);
+    });
 }
 
 // Drag and drop handlers
@@ -227,7 +223,7 @@ canvas.addEventListener('drop', (e) => {
 
     // Draw the part on the canvas
     const img = new Image();
-    img.src = `track-parts/${draggedPart.dataset.part}`;
+    img.src = `assets/track-parts/${draggedPart.dataset.part}`;
     img.onload = () => {
         const cellWidth = canvas.width / currentSize;
         const cellHeight = canvas.height / currentSize;
