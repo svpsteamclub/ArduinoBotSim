@@ -170,7 +170,7 @@ class TrackEditor {
             part.row === row && part.col === col
         );
         if (partIndex !== -1) {
-            this.trackParts[partIndex].rotation = (this.trackParts[partIndex].rotation || 0 + 90) % 360;
+            this.trackParts[partIndex].rotation = ((this.trackParts[partIndex].rotation || 0) + 90) % 360;
             this.drawTrack();
         }
     }
