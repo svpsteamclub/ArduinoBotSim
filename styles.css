@@ -258,6 +258,7 @@ p {
     gap: 0.75rem;
     margin-bottom: 20px;
     width: 100%;
+    padding: 0 1.5rem;
 }
 
 .pista-button {
@@ -585,6 +586,10 @@ p {
 }
 
 /* Ensure the code section uses the same layout as pista */
+#codigo .pista-layout {
+    margin-top: 1rem;
+}
+
 #codigo .pista-main {
     max-width: 700px;
     margin: 0 auto;
@@ -601,6 +606,7 @@ p {
     width: 100%;
     display: flex;
     gap: 0.75rem;
+    padding: 0 1.5rem;
 }
 
 #codigo .pista-button {
@@ -616,6 +622,7 @@ p {
 #codigo .code-editor-container {
     width: 100%;
     margin-top: 0;
+    padding: 0 1.5rem;
 }
 
 .simulator-container {
