@@ -117,6 +117,25 @@ function resizeCanvas(size) {
     createCanvasCells(size);
 }
 
+// Function to draw connection indicators on the canvas
+function drawConnectionIndicators(partKey, x, y, cellSize) {
+    const conn = trackConnections[partKey];
+    if (!conn) return;
+    const size = 12; // indicator size
+    // North
+    ctx.fillStyle = conn.north ? '#2ecc40' : '#ff4136';
+    ctx.fillRect(x + cellSize/2 - size/2, y + 2, size, size);
+    // East
+    ctx.fillStyle = conn.east ? '#2ecc40' : '#ff4136';
+    ctx.fillRect(x + cellSize - size - 2, y + cellSize/2 - size/2, size, size);
+    // South
+    ctx.fillStyle = conn.south ? '#2ecc40' : '#ff4136';
+    ctx.fillRect(x + cellSize/2 - size/2, y + cellSize - size - 2, size, size);
+    // West
+    ctx.fillStyle = conn.west ? '#2ecc40' : '#ff4136';
+    ctx.fillRect(x + 2, y + cellSize/2 - size/2, size, size);
+}
+
 // Function to draw the grid
 function drawGrid(size) {
     const canvasSize = size * CELL_SIZE;
@@ -155,6 +174,9 @@ function drawGrid(size) {
         img.src = `assets/track-parts/${partName}`;
         img.onload = () => {
             ctx.drawImage(img, x, y, cellSize, cellSize);
+            // Draw connection indicators after image loads
+            const partKey = partName.replace('.png', '');
+            drawConnectionIndicators(partKey, x, y, cellSize);
         };
     });
 }
@@ -273,11 +295,17 @@ function loadTrackParts() {
         
         // Add click event for selection
         part.addEventListener('click', () => {
-            // Remove 'selected' from all parts
-            trackParts.forEach(p => p.classList.remove('selected'));
-            // Add 'selected' to the clicked part
-            part.classList.add('selected');
-            selectedPart = fileName;
+            if (selectedPart === fileName) {
+                // Unselect if already selected
+                part.classList.remove('selected');
+                selectedPart = null;
+            } else {
+                // Remove 'selected' from all parts
+                trackParts.forEach(p => p.classList.remove('selected'));
+                // Add 'selected' to the clicked part
+                part.classList.add('selected');
+                selectedPart = fileName;
+            }
         });
         
         partsList.appendChild(part);
