@@ -208,16 +208,19 @@ function createCanvasCells(size) {
     canvasCells = [];
     placedParts.clear();
     
-    const cellSize = canvas.width / size;
+    // Use the canvas's displayed size for cell overlays
+    const rect = canvas.getBoundingClientRect();
+    const cellWidth = rect.width / size;
+    const cellHeight = rect.height / size;
     
     for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
             const cell = document.createElement('div');
             cell.className = 'canvas-cell';
-            cell.style.width = `${cellSize}px`;
-            cell.style.height = `${cellSize}px`;
-            cell.style.left = `${x * cellSize}px`;
-            cell.style.top = `${y * cellSize}px`;
+            cell.style.width = `${cellWidth}px`;
+            cell.style.height = `${cellHeight}px`;
+            cell.style.left = `${x * cellWidth}px`;
+            cell.style.top = `${y * cellHeight}px`;
             
             const cellIndex = y * size + x;
             
@@ -232,7 +235,7 @@ function createCanvasCells(size) {
                 }
             });
             
-            // FIX: Append to canvas container, not canvas
+            // Append to canvas container, not canvas
             canvas.parentElement.appendChild(cell);
             canvasCells.push(cell);
         }
