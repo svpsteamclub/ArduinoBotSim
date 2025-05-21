@@ -13,7 +13,7 @@ export const AVAILABLE_TRACK_PARTS = [
         name: 'C0.00-BCS',
         file: 'C0.00-BCS.png',
         description: 'Vacia',
-        connections: { N: false, E: false, S: fasle, W: false }
+        connections: { N: false, E: false, S: false, W: false }
     },
     {
         name: 'C1.01-RCS',
