@@ -304,28 +304,91 @@ class TrackEditor {
     generateRandomTrack() {
         this.trackParts = [];
         const numParts = this.gridSize * this.gridSize;
-
-        // Start with a base cross section in the center
         const centerRow = Math.floor(this.gridSize / 2);
         const centerCol = Math.floor(this.gridSize / 2);
+
+        // Start with a base cross section in the center
+        const startPart = AVAILABLE_TRACK_PARTS.find(part => 
+            part.connections.N && part.connections.E && part.connections.S && part.connections.W
+        );
+        
+        if (!startPart) {
+            console.error("No suitable starting part found");
+            return;
+        }
+
         this.placePart(centerRow, centerCol);
+        this.lastGeneratedTrackStartPosition = { row: centerRow, col: centerCol };
 
         // Generate the rest of the track
-        for (let i = 0; i < numParts - 1; i++) {
-            const row = Math.floor(i / this.gridSize);
-            const col = i % this.gridSize;
-            if (row === centerRow && col === centerCol) continue;
+        let attempts = 0;
+        const maxAttempts = numParts * 2;
+
+        while (this.trackParts.length < numParts && attempts < maxAttempts) {
+            attempts++;
             
-            const part = AVAILABLE_TRACK_PARTS[Math.floor(Math.random() * AVAILABLE_TRACK_PARTS.length)];
-            const rotation = Math.floor(Math.random() * 4) * 90;
+            // Get a random existing part
+            const randomPartIndex = Math.floor(Math.random() * this.trackParts.length);
+            const randomPart = this.trackParts[randomPartIndex];
+            const connections = this.getRotatedConnections(randomPart);
             
-            this.trackParts.push({
-                type: part.name,
-                row,
-                col,
-                rotation,
-                connections: part.connections
-            });
+            // Try each direction
+            const directions = ['N', 'E', 'S', 'W'];
+            const shuffledDirections = directions.sort(() => Math.random() - 0.5);
+            
+            let placed = false;
+            for (const direction of shuffledDirections) {
+                if (!connections[direction]) continue;
+                
+                let newRow = randomPart.row;
+                let newCol = randomPart.col;
+                
+                switch (direction) {
+                    case 'N': newRow--; break;
+                    case 'E': newCol++; break;
+                    case 'S': newRow++; break;
+                    case 'W': newCol--; break;
+                }
+                
+                // Check if position is valid and empty
+                if (newRow >= 0 && newRow < this.gridSize && 
+                    newCol >= 0 && newCol < this.gridSize &&
+                    !this.trackParts.some(p => p.row === newRow && p.col === newCol)) {
+                    
+                    // Find a compatible part
+                    const compatibleParts = AVAILABLE_TRACK_PARTS.filter(part => {
+                        const oppositeDir = {
+                            'N': 'S',
+                            'E': 'W',
+                            'S': 'N',
+                            'W': 'E'
+                        }[direction];
+                        
+                        return part.connections[oppositeDir];
+                    });
+                    
+                    if (compatibleParts.length > 0) {
+                        const selectedPart = compatibleParts[Math.floor(Math.random() * compatibleParts.length)];
+                        const rotation = Math.floor(Math.random() * 4) * 90;
+                        
+                        this.trackParts.push({
+                            type: selectedPart.name,
+                            row: newRow,
+                            col: newCol,
+                            rotation,
+                            connections: selectedPart.connections
+                        });
+                        
+                        placed = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (!placed && attempts >= maxAttempts) {
+                console.warn("Could not complete track generation");
+                break;
+            }
         }
 
         this.drawTrack();
