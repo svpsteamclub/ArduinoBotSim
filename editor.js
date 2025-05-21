@@ -4,7 +4,7 @@ require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-e
 let editorInstance;
 require(['vs/editor/editor.main'], function() {
   editorInstance = monaco.editor.create(document.getElementById('editor'), {
-    value: '// Escribe tu código Arduino aquí\nvoid setup() {\n  // Configuración inicial\n}\n\nvoid loop() {\n  // Código principal\n}',
+    value: '// Escribe tu código Arduino aquí\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  Serial.println("¡Hola mundo!");\n  delay(1000);\n}',
     language: 'cpp',
     theme: 'vs',
     automaticLayout: true,
@@ -25,25 +25,61 @@ const stopBtn = document.getElementById('stop-avr8js');
 const outputDiv = document.getElementById('avr8js-output');
 const serialMonitor = document.getElementById('serial-monitor');
 
+let avrRunner = null;
+let stopRequested = false;
+
 function appendSerial(text) {
   if (serialMonitor) {
-    serialMonitor.textContent += text + '\n';
+    serialMonitor.textContent += text;
     serialMonitor.scrollTop = serialMonitor.scrollHeight;
   }
 }
 
-runBtn && runBtn.addEventListener('click', () => {
+runBtn && runBtn.addEventListener('click', async () => {
   let code = '';
   if (editorInstance) {
     code = editorInstance.getValue();
   }
-  outputDiv.textContent = 'Simulación iniciada (placeholder). Código:\n' + code;
+  outputDiv.textContent = 'Compilando...';
   if (serialMonitor) serialMonitor.textContent = '';
-  // Example: appendSerial('Serial output will appear here...');
-  // TODO: Integrate avr8js simulation logic here using 'code' and appendSerial for serial output
+  stopRequested = false;
+  if (avrRunner) {
+    avrRunner.stop();
+    avrRunner = null;
+  }
+
+  try {
+    // Compile the code using avr-gcc-wasm
+    const result = await AvrGccWasm.compileSketch(code);
+    if (result.errors) {
+      outputDiv.textContent = 'Error de compilación:\n' + result.errors;
+      return;
+    }
+    outputDiv.textContent = 'Simulando...';
+    const hex = result.hex;
+    const { AVRRunner, loadHex } = window['avr8js'];
+    avrRunner = new AVRRunner(loadHex(hex));
+    avrRunner.usart.onByteTransmit = (value) => {
+      appendSerial(String.fromCharCode(value));
+    };
+    // Run simulation in steps to allow stop
+    function runStep() {
+      if (stopRequested) return;
+      avrRunner.execute(() => {
+        setTimeout(runStep, 0);
+      }, 50000); // Run 50,000 cycles per chunk
+    }
+    runStep();
+  } catch (err) {
+    outputDiv.textContent = 'Error de compilación o simulación:\n' + err;
+  }
 });
 
 stopBtn && stopBtn.addEventListener('click', () => {
   outputDiv.textContent = 'Simulación detenida.';
-  // TODO: Stop avr8js simulation logic here
+  stopRequested = true;
+  if (avrRunner) {
+    avrRunner.stop();
+    avrRunner = null;
+  }
 }); 
