@@ -37,7 +37,7 @@ export const AVAILABLE_TRACK_PARTS = [
         name: 'C1.04-MCS',
         file: 'C1.04-MCS.png',
         description: 'Middle Cross Section 2',
-        connections: { N: true, E: true, S: true, W: true }
+        connections: { N: false, E: true, S: true, W: false }
     },
     {
         name: 'C1.05-RCS',
