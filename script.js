@@ -256,19 +256,10 @@ function createCanvasCells(size) {
 
 // Function to place a part
 function placePart(cellIndex, partName) {
-    const cell = canvasCells[cellIndex];
-    const cellSize = canvas.width / currentSize;
-    const x = (cellIndex % currentSize) * cellSize;
-    const y = Math.floor(cellIndex / currentSize) * cellSize;
-    
-    // Draw part on canvas
-    const img = new Image();
-    img.src = `assets/track-parts/${partName}`;
-    img.onload = () => {
-        ctx.drawImage(img, x, y, cellSize, cellSize);
-        placedParts.set(cellIndex, partName);
-        selectCell(cellIndex);
-    };
+    // Replace any existing part in this cell
+    placedParts.set(cellIndex, partName);
+    drawGrid(currentSize);
+    selectCell(cellIndex);
 }
 
 // Function to select a cell
