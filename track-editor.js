@@ -232,7 +232,7 @@ class TrackEditor {
                     this.drawConnectionIndicators(part, x, y, cellSize);
                     resolve();
                 };
-                img.src = `assets/track-parts/${part.type}.png`;
+                img.src = `assets/track-parts/${part.type}`;
             });
         });
 
