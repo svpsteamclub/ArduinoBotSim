@@ -36,6 +36,10 @@ function appendSerial(text) {
 }
 
 runBtn && runBtn.addEventListener('click', async () => {
+  if (!window.AvrGccWasm || !window.AvrGccWasm.compileSketch) {
+    outputDiv.textContent = 'Error: avr-gcc-wasm library not loaded. Please check your internet connection or CDN link.';
+    return;
+  }
   let code = '';
   if (editorInstance) {
     code = editorInstance.getValue();
