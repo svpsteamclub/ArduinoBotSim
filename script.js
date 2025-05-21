@@ -736,4 +736,28 @@ stopSimButton.addEventListener('click', () => {
 });
 
 // Initially disable the stop button
-stopSimButton.disabled = true; 
+stopSimButton.disabled = true;
+
+// Add Borrar button functionality
+const borrarBtn = document.getElementById('borrar');
+if (borrarBtn) {
+    borrarBtn.addEventListener('click', () => {
+        eraseMode = !eraseMode;
+        if (eraseMode) {
+            borrarBtn.style.background = '#d9534f';
+            borrarBtn.style.color = 'white';
+        } else {
+            borrarBtn.style.background = '';
+            borrarBtn.style.color = '';
+        }
+    });
+}
+
+// Add Limpiar button functionality
+const limpiarBtn = document.getElementById('limpiar');
+if (limpiarBtn) {
+    limpiarBtn.addEventListener('click', () => {
+        placedParts.clear();
+        drawGrid(currentSize);
+    });
+} 
