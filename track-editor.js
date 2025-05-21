@@ -282,7 +282,7 @@ class TrackEditor {
             if (part.connections[dirKey]) {
                 let currentDirIndex = DIRECTIONS.findIndex(d => d.name === dirKey);
                 if (currentDirIndex === -1) { continue; }
-                let newDirIndex = (currentDirIndex + numRotations) % 4;
+                let newDirIndex = (currentDirIndex - numRotations + 4) % 4;
                 rotated[DIRECTIONS[newDirIndex].name] = true;
             }
         }
