@@ -46,7 +46,7 @@ class TrackEditor {
         // Generate random track
         document.querySelector('.generate-button').addEventListener('click', () => {
             if (this.isEraseMode) this.toggleEraseMode();
-            this.generateRandomTrack();
+            this.generateRandomTrackWithRetry();
         });
 
         // Export track
@@ -68,7 +68,6 @@ class TrackEditor {
         // Canvas interaction
         this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
         this.canvas.addEventListener('dblclick', (e) => this.handleCanvasDoubleClick(e));
-        this.canvas.addEventListener('mousemove', (e) => this.handleCanvasHover(e));
     }
 
     toggleEraseMode() {
@@ -436,6 +435,14 @@ class TrackEditor {
             }
         }
         this.drawTrack();
+    }
+
+    generateRandomTrackWithRetry(maxRetries = 30) {
+        for (let i = 0; i < maxRetries; i++) {
+            this.generateRandomTrack();
+            if (this.trackParts.length > 0) return;
+        }
+        alert('No se pudo generar una pista válida tras varios intentos.');
     }
 
     exportTrack() {
