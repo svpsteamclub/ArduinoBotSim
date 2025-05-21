@@ -311,6 +311,7 @@ function createCanvasCells(size) {
                     const partObj = placedParts.get(cellIndex);
                     const currentRot = (typeof partObj.rotation === 'number') ? partObj.rotation : 0;
                     const newRot = (currentRot + 90) % 360;
+                    console.log('cellIndex:', cellIndex, 'currentRot:', currentRot, 'newRot:', newRot, 'partObj:', partObj);
                     placedParts.set(cellIndex, { name: partObj.name, rotation: newRot });
                     drawGrid(currentSize);
                 }
