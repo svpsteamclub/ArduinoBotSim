@@ -82,6 +82,14 @@
                                 <li><b>analogWrite(pin, valor)</b>: (placeholder, sin efecto en esta demo).</li>
                             </ul>
                             <br>
+                            <b>Sobre el robot seguidor de líneas:</b><br>
+                            El robot simulado es un <b>seguidor de líneas</b>. Cuenta con sensores en la parte frontal que detectan si están sobre una línea negra o no. En una versión completa, podrías leer estos sensores usando <b>digitalRead(pin)</b> y controlar los motores con <b>analogWrite(pin, valor)</b>.<br>
+                            <ul style="margin:8px 0 0 18px;padding:0;">
+                                <li><b>Sensores de línea:</b> Detectan si el robot está sobre la línea (negro) o fuera de ella (blanco). Usarías <b>digitalRead(pin)</b> para leerlos.</li>
+                                <li><b>Motores:</b> Se controlan ajustando la velocidad de cada rueda (izquierda/derecha) con <b>analogWrite(pin, valor)</b>.</li>
+                            </ul>
+                            <i>En esta demo básica, los sensores y motores son solo ejemplos y no están conectados a una simulación visual, pero puedes practicar la lógica de un seguidor de líneas usando las funciones disponibles.</i>
+                            <br><br>
                             <b>Ejemplo básico:</b><br>
                             <pre style="background:#eee;border-radius:8px;padding:8px 12px;overflow-x:auto;">function setup() {
   Serial.begin(9600);
