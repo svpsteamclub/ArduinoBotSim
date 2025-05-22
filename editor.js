@@ -1,11 +1,11 @@
-// Monaco + AVR8js minimalist integration
+// Minimalist JS Arduino-like simulation in Monaco
 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
 
 let editorInstance;
 require(['vs/editor/editor.main'], function() {
   editorInstance = monaco.editor.create(document.getElementById('editor'), {
-    value: '// Escribe tu código Arduino aquí\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  Serial.println("¡Hola mundo!");\n  delay(1000);\n}',
-    language: 'cpp',
+    value: `// Escribe tu código Arduino estilo JS\nfunction setup() {\n  Serial.begin(9600);\n}\n\nasync function loop() {\n  Serial.println('¡Hola mundo!');\n  await delay(1000);\n}`,
+    language: 'javascript',
     theme: 'vs',
     automaticLayout: true,
     minimap: { enabled: false },
@@ -25,7 +25,6 @@ const stopBtn = document.getElementById('stop-avr8js');
 const outputDiv = document.getElementById('avr8js-output');
 const serialMonitor = document.getElementById('serial-monitor');
 
-let avrRunner = null;
 let stopRequested = false;
 
 function appendSerial(text) {
@@ -35,67 +34,59 @@ function appendSerial(text) {
   }
 }
 
-async function compileWithWokwi(inoCode) {
-  const response = await fetch("https://compiler.wokwi.com/compile", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      files: { "sketch.ino": inoCode },
-    }),
-  });
-  const data = await response.json();
-  if (data.success) {
-    return { hex: data.hex };
-  } else {
-    return { errors: data.stderr || "Unknown error" };
-  }
-}
+// Minimalist Arduino API shim
+const arduinoAPI = {
+  pinMode: (pin, mode) => {},
+  digitalRead: (pin) => 0,
+  analogWrite: (pin, value) => {},
+  delay: (ms) => new Promise(resolve => setTimeout(resolve, ms)),
+  Serial: {
+    begin: (baud) => appendSerial(`Serial.begin(${baud})\n`),
+    print: (msg) => appendSerial(String(msg)),
+    println: (msg = "") => appendSerial(String(msg) + '\n'),
+  },
+};
 
 runBtn && runBtn.addEventListener('click', async () => {
   let code = '';
   if (editorInstance) {
     code = editorInstance.getValue();
   }
-  outputDiv.textContent = 'Compilando...';
+  outputDiv.textContent = 'Simulación iniciada (JS Arduino).';
   if (serialMonitor) serialMonitor.textContent = '';
   stopRequested = false;
-  if (avrRunner) {
-    avrRunner.stop();
-    avrRunner = null;
+
+  // Prepare the user code
+  let setup = () => {};
+  let loop = async () => {};
+  try {
+    // eslint-disable-next-line no-new-func
+    const userScript = new Function('pinMode', 'digitalRead', 'analogWrite', 'delay', 'Serial', code + '\nreturn { setup, loop };');
+    const result = userScript(
+      arduinoAPI.pinMode,
+      arduinoAPI.digitalRead,
+      arduinoAPI.analogWrite,
+      arduinoAPI.delay,
+      arduinoAPI.Serial
+    );
+    setup = typeof result.setup === 'function' ? result.setup : setup;
+    loop = typeof result.loop === 'function' ? result.loop : loop;
+  } catch (e) {
+    outputDiv.textContent = 'Error en el código: ' + e.message;
+    return;
   }
 
   try {
-    // Compile the code using Wokwi API
-    const result = await compileWithWokwi(code);
-    if (result.errors) {
-      outputDiv.textContent = 'Error de compilación:\n' + result.errors;
-      return;
+    setup();
+    while (!stopRequested) {
+      await loop();
     }
-    outputDiv.textContent = 'Simulando...';
-    const hex = result.hex;
-    const { AVRRunner, loadHex } = window['avr8js'];
-    avrRunner = new AVRRunner(loadHex(hex));
-    avrRunner.usart.onByteTransmit = (value) => {
-      appendSerial(String.fromCharCode(value));
-    };
-    // Run simulation in steps to allow stop
-    function runStep() {
-      if (stopRequested) return;
-      avrRunner.execute(() => {
-        setTimeout(runStep, 0);
-      }, 50000); // Run 50,000 cycles per chunk
-    }
-    runStep();
-  } catch (err) {
-    outputDiv.textContent = 'Error de compilación o simulación:\n' + err;
+  } catch (e) {
+    outputDiv.textContent = 'Error en la simulación: ' + e.message;
   }
 });
 
 stopBtn && stopBtn.addEventListener('click', () => {
   outputDiv.textContent = 'Simulación detenida.';
   stopRequested = true;
-  if (avrRunner) {
-    avrRunner.stop();
-    avrRunner = null;
-  }
 }); 
