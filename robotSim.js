@@ -61,16 +61,25 @@
   }
 
   // --- Arduino API for user code ---
+  const INPUT = "INPUT";
+  const OUTPUT = "OUTPUT";
+  const HIGH = 1;
+  const LOW = 0;
+
+  function constrain(value, minVal, maxVal) {
+    return Math.min(Math.max(value, minVal), maxVal);
+  }
+
   const arduinoAPI = {
     pinMode: (pin, mode) => {},
     digitalRead: (pin) => {
       if (pin === 2) return robot.sensors[0].value;
       if (pin === 3) return robot.sensors[1].value;
       if (pin === 4) return robot.sensors[2].value;
-      return 1;
+      return HIGH;
     },
     analogWrite: (pin, value) => {
-      value = Math.max(0, Math.min(255, value));
+      value = constrain(value, 0, 255);
       if (pin === 5) robot.speedL = value;
       if (pin === 6) robot.speedR = value;
     },
@@ -80,6 +89,7 @@
       print: (msg) => appendSerial(String(msg)),
       println: (msg = "") => appendSerial(String(msg) + '\n'),
     },
+    HIGH, LOW, INPUT, OUTPUT
   };
 
   function appendSerial(text) {
@@ -177,15 +187,15 @@
     stopSim();
     resetSim();
     userCode = code;
-    // Preparar funciones de usuario
     try {
-      const userScript = new Function('pinMode', 'digitalRead', 'analogWrite', 'delay', 'Serial', code + '\nreturn { setup, loop };');
+      const userScript = new Function('pinMode', 'digitalRead', 'analogWrite', 'delay', 'Serial', 'HIGH', 'LOW', 'INPUT', 'OUTPUT', 'constrain', code + '\nreturn { setup, loop };');
       const result = userScript(
         arduinoAPI.pinMode,
         arduinoAPI.digitalRead,
         arduinoAPI.analogWrite,
         arduinoAPI.delay,
-        arduinoAPI.Serial
+        arduinoAPI.Serial,
+        HIGH, LOW, INPUT, OUTPUT, constrain
       );
       userSetup = typeof result.setup === 'function' ? result.setup : (()=>{});
       userLoop = typeof result.loop === 'function' ? result.loop : (async()=>{});
