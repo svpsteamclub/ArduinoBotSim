@@ -56,11 +56,15 @@ runBtn && runBtn.addEventListener('click', async () => {
   if (serialMonitor) serialMonitor.textContent = '';
   stopRequested = false;
 
-  // Prepare the user code
+  // Enviar el código al simulador visual (si existe la función global)
+  if (window.runRobotSimulation) {
+    window.runRobotSimulation(code);
+  }
+
+  // Ejecutar localmente (opcional, para mantener compatibilidad)
   let setup = () => {};
   let loop = async () => {};
   try {
-    // eslint-disable-next-line no-new-func
     const userScript = new Function('pinMode', 'digitalRead', 'analogWrite', 'delay', 'Serial', code + '\nreturn { setup, loop };');
     const result = userScript(
       arduinoAPI.pinMode,

@@ -29,14 +29,20 @@
         <section id="simulador" class="section active">
             <div class="main-column">
                 <h1>Simulador</h1>
-                <p>Interactúa con el simulador de robot Arduino.</p>
                 <div class="simulator-container">
-                    <div class="simulator-output">
-                        <div class="output-display"></div>
+                    <canvas id="simulator-canvas" width="600" height="400" style="border-radius:12px;border:1px solid #eee;background:#fff;display:block;margin:0 auto;"></canvas>
+                    <div style="display:flex;gap:8px;justify-content:center;margin:16px 0 0 0;">
+                        <button id="sim-start" class="pista-button">Iniciar</button>
+                        <button id="sim-stop" class="pista-button">Detener</button>
+                        <button id="sim-reset" class="pista-button">Reset</button>
                     </div>
-                    <div class="simulator-controls">
-                        <button id="start-sim">Iniciar Simulación</button>
-                        <button id="stop-sim">Detener</button>
+                    <div style="margin-top:18px;font-size:13px;color:#333;background:#f8f8f8;border-radius:12px;padding:10px 14px;line-height:1.7;">
+                        <b>Nota:</b> El robot y la pista se controlan con el código de la pestaña Código.<br>
+                        Pulsa <b>Run</b> en la pestaña Código para ejecutar tu código sobre el robot visual.
+                    </div>
+                    <div style="margin-top:18px;">
+                        <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Serial Monitor</div>
+                        <div id="sim-serial-monitor" style="height:80px;background:#222;color:#b6f7c7;font-family:monospace;font-size:13px;border-radius:4px;padding:8px 12px;overflow-y:auto;"></div>
                     </div>
                 </div>
             </div>
@@ -146,5 +152,6 @@ async function loop() {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
     <script src="editor.js"></script>
     <script src="script.js"></script>
+    <script src="robotSim.js"></script>
 </body>
 </html> 
