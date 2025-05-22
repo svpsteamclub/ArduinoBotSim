@@ -67,6 +67,31 @@
                             <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Serial Monitor</div>
                             <div id="serial-monitor" style="height:120px;background:#222;color:#b6f7c7;font-family:monospace;font-size:13px;border-radius:4px;padding:8px 12px;overflow-y:auto;"></div>
                         </div>
+                        <div style="margin-top:18px;font-size:13px;color:#333;background:#f8f8f8;border-radius:12px;padding:16px 18px;line-height:1.7;">
+                            <b>¿Cómo usar el simulador?</b><br>
+                            Escribe tu código usando las funciones <b>setup()</b> y <b>loop()</b> como en Arduino, pero en <b>JavaScript</b>.<br><br>
+                            <b>Funciones y objetos disponibles:</b><br>
+                            <ul style="margin:8px 0 0 18px;padding:0;">
+                                <li><b>setup()</b>: Se ejecuta una vez al inicio.</li>
+                                <li><b>loop()</b>: Se ejecuta repetidamente (puede ser <b>async</b> para usar <b>await delay(ms)</b>).</li>
+                                <li><b>Serial.begin(baud)</b>: Inicializa el monitor serie.</li>
+                                <li><b>Serial.print(msg)</b>, <b>Serial.println(msg)</b>: Imprime texto en el monitor serie.</li>
+                                <li><b>await delay(ms)</b>: Pausa la ejecución por <b>ms</b> milisegundos (solo dentro de <b>loop</b> async).</li>
+                                <li><b>pinMode(pin, modo)</b>: (placeholder, sin efecto en esta demo).</li>
+                                <li><b>digitalRead(pin)</b>: (placeholder, siempre retorna 0).</li>
+                                <li><b>analogWrite(pin, valor)</b>: (placeholder, sin efecto en esta demo).</li>
+                            </ul>
+                            <br>
+                            <b>Ejemplo básico:</b><br>
+                            <pre style="background:#eee;border-radius:8px;padding:8px 12px;overflow-x:auto;">function setup() {
+  Serial.begin(9600);
+}
+
+async function loop() {
+  Serial.println('¡Hola mundo!');
+  await delay(1000);
+}</pre>
+                        </div>
                     </div>
                 </div>
             </div>
