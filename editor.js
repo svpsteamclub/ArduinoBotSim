@@ -35,11 +35,23 @@ function appendSerial(text) {
   }
 }
 
-runBtn && runBtn.addEventListener('click', async () => {
-  if (!window.AvrGccWasm || !window.AvrGccWasm.compileSketch) {
-    outputDiv.textContent = 'Error: avr-gcc-wasm library not loaded. Please check your internet connection or CDN link.';
-    return;
+async function compileWithWokwi(inoCode) {
+  const response = await fetch("https://compiler.wokwi.com/compile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      files: { "sketch.ino": inoCode },
+    }),
+  });
+  const data = await response.json();
+  if (data.success) {
+    return { hex: data.hex };
+  } else {
+    return { errors: data.stderr || "Unknown error" };
   }
+}
+
+runBtn && runBtn.addEventListener('click', async () => {
   let code = '';
   if (editorInstance) {
     code = editorInstance.getValue();
@@ -53,8 +65,8 @@ runBtn && runBtn.addEventListener('click', async () => {
   }
 
   try {
-    // Compile the code using avr-gcc-wasm
-    const result = await window.AvrGccWasm.compileSketch(code);
+    // Compile the code using Wokwi API
+    const result = await compileWithWokwi(code);
     if (result.errors) {
       outputDiv.textContent = 'Error de compilación:\n' + result.errors;
       return;
